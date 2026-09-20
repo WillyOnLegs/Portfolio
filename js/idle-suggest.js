@@ -1,38 +1,47 @@
 /* ==========================================================================
-   Idle Suggest — étiquette + éventail de suggestions autour du curseur
-   Desktop only, page d'accueil uniquement, une seule fois par session.
+   Idle Suggest — éventail de suggestions ancré au curseur
+   Desktop only, page d'accueil uniquement.
+   - Démo automatique une seule fois (tout premier passage, via localStorage)
+   - Ensuite : appui maintenu sur la touche W n'importe où sur la page
    ========================================================================== */
 (function () {
   'use strict';
 
   if (!document.body.classList.contains('page-accueil')) return;
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  if (sessionStorage.getItem('wol-suggest-shown')) return;
 
-  var DELAI_APPARITION = 4500; // ms avant que l'étiquette apparaisse
+  var SEUIL_HOLD = 550;   // ms de maintien de W avant activation
+  var DELAI_DEMO = 4000;  // ms avant la démo automatique au tout premier passage
+  var CLE_VU = 'wol-suggest-vu';
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var curX = window.innerWidth / 2;
   var curY = window.innerHeight * 0.55;
-  var aBouge = false;
-
   function onMove(e) {
     curX = e.clientX;
     curY = e.clientY;
-    aBouge = true;
   }
   document.addEventListener('mousemove', onMove, { passive: true });
 
-  function creerWidget() {
+  function estChampSaisie(el) {
+    return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+  }
+
+  function texteCaption() {
+    var fr = document.documentElement.lang === 'fr';
+    return fr ? 'Que veux-tu voir\u00a0?' : 'What do you want to see?';
+  }
+
+  var widgetActuel = null;
+
+  function creerWidget(x, y) {
     var wrap = document.createElement('div');
     wrap.className = 'idle-suggest';
-    wrap.id = 'idle-suggest';
+    wrap.style.setProperty('--is-x', x + 'px');
+    wrap.style.setProperty('--is-y', y + 'px');
     wrap.innerHTML =
-      '<button type="button" class="idle-suggest-label" id="idle-suggest-label" aria-expanded="false">' +
-        '<span class="idle-suggest-label-txt">Envie de voir un truc&nbsp;?</span>' +
-        '<span class="idle-suggest-arrow" aria-hidden="true">&rarr;</span>' +
-      '</button>' +
-      '<div class="idle-suggest-fan" id="idle-suggest-fan" role="menu" aria-label="Suggestions de navigation">' +
+      '<p class="idle-suggest-label">' + texteCaption() + '</p>' +
+      '<div class="idle-suggest-fan" role="menu" aria-label="Suggestions de navigation">' +
         '<button type="button" class="idle-suggest-pastille" data-cible="showreel" role="menuitem"><span>Showreel</span></button>' +
         '<button type="button" class="idle-suggest-pastille" data-cible="motion" role="menuitem"><span>Motion</span></button>' +
         '<button type="button" class="idle-suggest-pastille" data-cible="graphic" role="menuitem"><span>Graphic</span></button>' +
@@ -55,17 +64,30 @@
     window.location.href = '/work?type=' + typesParPage[cible];
   }
 
-  function init() {
-    document.removeEventListener('mousemove', onMove);
-    sessionStorage.setItem('wol-suggest-shown', '1');
+  function onKeyFermer(e) {
+    if (e.key === 'Escape') fermerWidget();
+  }
+  function onClicExterieur(e) {
+    if (widgetActuel && !widgetActuel.contains(e.target)) fermerWidget();
+  }
 
-    var wrap = creerWidget();
-    var label = wrap.querySelector('#idle-suggest-label');
-    var fan = wrap.querySelector('#idle-suggest-fan');
-    var ouvert = false;
+  function fermerWidget() {
+    if (!widgetActuel) return;
+    var wrap = widgetActuel;
+    widgetActuel = null;
+    wrap.classList.remove('idle-suggest--visible');
+    document.removeEventListener('keydown', onKeyFermer);
+    document.removeEventListener('click', onClicExterieur, true);
+    setTimeout(function () {
+      if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    }, 400);
+  }
 
-    wrap.style.setProperty('--is-x', curX + 'px');
-    wrap.style.setProperty('--is-y', curY + 'px');
+  function ouvrirEventail(x, y) {
+    if (widgetActuel) return; // déjà ouvert, on ne double pas
+
+    var wrap = creerWidget(x, y);
+    widgetActuel = wrap;
 
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
@@ -73,49 +95,49 @@
       });
     });
 
-    function onKey(e) {
-      if (e.key === 'Escape') fermer();
-    }
-    function onClicExterieur(e) {
-      if (!wrap.contains(e.target)) fermer();
-    }
+    document.addEventListener('keydown', onKeyFermer);
+    document.addEventListener('click', onClicExterieur, true);
+    window.addEventListener('scroll', fermerWidget, { once: true, passive: true });
 
-    function ouvrir() {
-      if (ouvert) return;
-      ouvert = true;
-      wrap.classList.add('idle-suggest--ouvert');
-      label.setAttribute('aria-expanded', 'true');
-      document.addEventListener('keydown', onKey);
-      document.addEventListener('click', onClicExterieur, true);
-    }
-
-    function fermer() {
-      wrap.classList.remove('idle-suggest--visible', 'idle-suggest--ouvert');
-      document.removeEventListener('keydown', onKey);
-      document.removeEventListener('click', onClicExterieur, true);
-      setTimeout(function () {
-        if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
-      }, 400);
-    }
-
-    label.addEventListener('click', ouvrir);
-    window.addEventListener('scroll', fermer, { once: true, passive: true });
-
-    Array.prototype.forEach.call(fan.querySelectorAll('.idle-suggest-pastille'), function (btn) {
+    Array.prototype.forEach.call(wrap.querySelectorAll('.idle-suggest-pastille'), function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         var cible = btn.dataset.cible;
-        fermer();
+        fermerWidget();
         agir(cible);
       });
     });
   }
 
-  setTimeout(function () {
-    if (!aBouge) {
-      curX = window.innerWidth / 2;
-      curY = window.innerHeight * 0.55;
+  /* -- Déclencheur clavier : maintenir W --------------------------------- */
+  var wTimer = null;
+  var wEnCours = false;
+
+  document.addEventListener('keydown', function (e) {
+    if (wEnCours) return; // ignore la répétition auto du keydown pendant le maintien
+    if (!e.key || e.key.toLowerCase() !== 'w') return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return; // laisse passer Ctrl/Cmd+W etc.
+    if (estChampSaisie(document.activeElement)) return;
+    wEnCours = true;
+    wTimer = setTimeout(function () {
+      ouvrirEventail(curX, curY);
+    }, reduceMotion ? 0 : SEUIL_HOLD);
+  });
+
+  document.addEventListener('keyup', function (e) {
+    if (!e.key || e.key.toLowerCase() !== 'w') return;
+    wEnCours = false;
+    if (wTimer) {
+      clearTimeout(wTimer);
+      wTimer = null;
     }
-    init();
-  }, reduceMotion ? 300 : DELAI_APPARITION);
+  });
+
+  /* -- Démo automatique, une seule fois au tout premier passage ---------- */
+  if (!localStorage.getItem(CLE_VU)) {
+    localStorage.setItem(CLE_VU, '1');
+    setTimeout(function () {
+      ouvrirEventail(curX, curY);
+    }, reduceMotion ? 300 : DELAI_DEMO);
+  }
 })();
