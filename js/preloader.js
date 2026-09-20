@@ -1,0 +1,7 @@
+(function(){'use strict';const preloader=document.getElementById('preloader');if(!preloader)return;function estReload(){try{var nav=performance.getEntriesByType('navigation');if(nav.length>0)return nav[0].type==='reload';}catch(e){}
+return!!(performance.navigation&&performance.navigation.type===1);}
+if(!estReload()&&sessionStorage.getItem('wol-loader-done')){preloader.remove();return;}
+sessionStorage.setItem('wol-loader-done','1');window.__preloaderActif=true;document.body.style.overflow='hidden';const video=document.getElementById('pl-video');let videoTerminee=false;let pageChargee=document.readyState==='complete';let sortieDeclenchee=false;const TIMEOUT_SECU=8000;function tenteSortir(){if(sortieDeclenchee)return;if(videoTerminee&&pageChargee){sortieDeclenchee=true;sortir();}}
+setTimeout(function(){if(sortieDeclenchee)return;videoTerminee=true;pageChargee=true;tenteSortir();},TIMEOUT_SECU);if(video){video.addEventListener('ended',function(){videoTerminee=true;tenteSortir();});video.addEventListener('error',function(){videoTerminee=true;tenteSortir();});}else{videoTerminee=true;}
+if(!pageChargee){window.addEventListener('load',function(){pageChargee=true;tenteSortir();});}
+function sortir(){preloader.classList.add('pl-sortie');document.body.style.overflow='';preloader.addEventListener('transitionend',function(){preloader.remove();},{once:true});setTimeout(function(){if(preloader.parentNode)preloader.remove();},1100);}})();
