@@ -1,0 +1,153 @@
+/* ==========================================================================
+   Idle Suggest — étiquette + éventail de suggestions autour du curseur
+   Desktop uniquement (voir idle-suggest.js), page d'accueil uniquement.
+   ========================================================================== */
+
+.idle-suggest {
+  --is-x: 50vw;
+  --is-y: 50vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5000;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(var(--is-x), var(--is-y));
+  transition: opacity var(--dur-normale) var(--ease-out);
+}
+
+.idle-suggest--visible {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.idle-suggest--visible .idle-suggest-label {
+  pointer-events: auto;
+}
+
+/* -- Étiquette d'invite ---------------------------------------------- */
+
+.idle-suggest-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  white-space: nowrap;
+  transform: translate(-50%, -140%) scale(0.92);
+  padding: 0.75em 1.1em;
+  border: none;
+  border-radius: 999px;
+  background: var(--noir);
+  color: var(--blanc);
+  font-family: var(--font-corps);
+  font-size: var(--fs-mono-sm);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    transform var(--dur-normale) var(--ease-out),
+    opacity var(--dur-rapide) var(--ease-out);
+}
+
+.idle-suggest--visible .idle-suggest-label {
+  transform: translate(-50%, -140%) scale(1);
+}
+
+.idle-suggest--ouvert .idle-suggest-label {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -140%) scale(0.9);
+}
+
+.idle-suggest-arrow {
+  display: inline-block;
+  transition: transform var(--dur-rapide) var(--ease-out);
+}
+
+.idle-suggest-label:hover .idle-suggest-arrow {
+  transform: translateX(3px);
+}
+
+/* -- Éventail de pastilles -------------------------------------------- */
+
+.idle-suggest-fan {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.idle-suggest-pastille {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(5.5rem, 7vw, 6.5rem);
+  height: clamp(5.5rem, 7vw, 6.5rem);
+  border-radius: 50%;
+  border: 1px solid var(--noir);
+  background: var(--blanc);
+  color: var(--noir);
+  font-family: var(--font-titre);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  transition:
+    transform var(--dur-normale) var(--ease-out),
+    opacity var(--dur-rapide) var(--ease-out),
+    background var(--dur-rapide) var(--ease-out),
+    color var(--dur-rapide) var(--ease-out);
+  transition-delay: 0s;
+}
+
+.idle-suggest-pastille span {
+  pointer-events: none;
+}
+
+/* Position en arc au-dessus du point de déclenchement */
+.idle-suggest-pastille[data-cible="showreel"] { --fx: -118px; --fy: -84px; }
+.idle-suggest-pastille[data-cible="motion"]   { --fx: 0px;    --fy: -156px; }
+.idle-suggest-pastille[data-cible="graphic"]  { --fx: 118px;  --fy: -84px; }
+
+.idle-suggest--ouvert .idle-suggest-pastille {
+  opacity: 1;
+  transform: translate(calc(-50% + var(--fx)), calc(-50% + var(--fy))) scale(1);
+}
+
+.idle-suggest--ouvert .idle-suggest-pastille[data-cible="showreel"] { transition-delay: 0.02s; }
+.idle-suggest--ouvert .idle-suggest-pastille[data-cible="motion"]   { transition-delay: 0.08s; }
+.idle-suggest--ouvert .idle-suggest-pastille[data-cible="graphic"]  { transition-delay: 0.14s; }
+
+.idle-suggest-pastille:hover,
+.idle-suggest-pastille:focus-visible {
+  background: var(--noir);
+  color: var(--blanc);
+  transform: translate(calc(-50% + var(--fx)), calc(-50% + var(--fy))) scale(1.1);
+}
+
+.idle-suggest--ouvert .idle-suggest-fan {
+  pointer-events: auto;
+}
+
+/* -- Garde-fous --------------------------------------------------------- */
+
+@media (hover: none) {
+  .idle-suggest {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idle-suggest,
+  .idle-suggest-label,
+  .idle-suggest-pastille,
+  .idle-suggest-arrow {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}
