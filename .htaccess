@@ -1,0 +1,52 @@
+# NOTE : ces règles ne tournent que sur Apache (willyol.com). Sur Vercel ce fichier est ignoré.
+# Les liens du site pointent temporairement vers les vrais fichiers .html — rechercher "CLEAN-URL" / "data-clean-url" pour les remettre.
+
+# ==============================================================
+# WillyOL — URLs propres (clean URLs)
+# ==============================================================
+
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # --------------------------------------------------------------
+    # 1) Redirections 301 — anciennes URLs vers les nouvelles propres
+    # --------------------------------------------------------------
+
+    # /index.html  ->  /
+    RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+    RewriteRule ^ / [R=301,L]
+
+    # /pages/projets/<slug>.html  ->  /work/<slug>
+    RewriteCond %{THE_REQUEST} \s/+pages/projets/([^/.\s?]+)\.html[\s?] [NC]
+    RewriteRule ^ /work/%1 [R=301,L]
+
+    # /pages/projets.html  ->  /work
+    RewriteCond %{THE_REQUEST} \s/+pages/projets\.html[\s?] [NC]
+    RewriteRule ^ /work [R=301,L]
+
+    # /pages/apropos.html  ->  /about
+    RewriteCond %{THE_REQUEST} \s/+pages/apropos\.html[\s?] [NC]
+    RewriteRule ^ /about [R=301,L]
+
+    # /pages/contact.html  ->  /contact
+    RewriteCond %{THE_REQUEST} \s/+pages/contact\.html[\s?] [NC]
+    RewriteRule ^ /contact [R=301,L]
+
+    # --------------------------------------------------------------
+    # 2) Réécritures internes — URL propre  ->  fichier réel
+    # --------------------------------------------------------------
+
+    # /work/<slug>  ->  /pages/projets/<slug>.html
+    RewriteRule ^work/([^/.]+)/?$ /pages/projets/$1.html [L]
+
+    # /work  ->  /pages/projets.html
+    RewriteRule ^work/?$ /pages/projets.html [L]
+
+    # /about  ->  /pages/apropos.html
+    RewriteRule ^about/?$ /pages/apropos.html [L]
+
+    # /contact  ->  /pages/contact.html
+    RewriteRule ^contact/?$ /pages/contact.html [L]
+</IfModule>
