@@ -10,10 +10,12 @@ if(typeof window!=='undefined'){window.PROJETS=PROJETS;window.getProjetBySlug=ge
 
    Deux types de blocs :
      { type:'full', media:M }
-         → un grand contenu sur toute la largeur (16:9)
+         → un grand contenu sur toute la largeur
+           FORMAT : 3840 x 2160 (16:9, 4K)
      { type:'trio', side:'left'|'right', vertical:M, horizontals:[M, M] }
          → 1 contenu vertical + 2 horizontaux empilés
            (side = côté où se place le vertical)
+           FORMATS : vertical 1200 x 1500 — horizontaux 1200 x 720
 
    Un média M :
      { src:'/medias/…', video:true, alt:'…' }
@@ -192,7 +194,7 @@ var PROJETS_SECTIONS = (function () {
         { type: 'trio', side: 'right',
           vertical: { src: P + 'LOW/maneken-OHGP07.webp', alt: 'maneken — OHGP07' },
           horizontals: [
-            { src: P + 'LOW/Visuel%20(cover-album).webp', alt: 'maneken — Cover album LOW', fit: 'contain', bg: '#000000' },
+            { src: P + 'LOW/Visuel%20(cover-album).webp', alt: 'maneken — Cover album LOW' },
             { src: P + 'LOW/maneken-STDIO1.webp', alt: 'maneken — Studio I' },
           ] },
       ]},

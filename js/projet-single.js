@@ -185,15 +185,6 @@
     var inner = el('div', 'pp-side-inner');
     side.appendChild(inner);
 
-    var back = el('a', 'pp-back', {
-      href: '/pages/projets.html', /* CLEAN-URL: href:'/work' */
-      'data-projet-retour': true,
-      'data-curseur': true,
-      'data-i18n': 'projet.retour'
-    });
-    back.textContent = t('projet.retour', '← Back to work');
-    inner.appendChild(back);
-
     var main = el('div', 'pp-side-main');
     inner.appendChild(main);
 
@@ -201,9 +192,6 @@
     var h1 = el('h1', 'pp-titre');
     h1.textContent = projet.nom;
     head.appendChild(h1);
-    var tag = el('p', 'pp-tagline');
-    buildTagline(tag, projet, 'proj.' + slug + '.intro-tagline');
-    head.appendChild(tag);
     main.appendChild(head);
 
     var cr = projet.credits || {};
@@ -271,8 +259,6 @@
       var nxName = el('a', 'pp-next-nom', { href: next.href, 'data-curseur': true, tabindex: '-1' });
       nxName.textContent = next.nom;
       nxName.style.setProperty('--len', Math.max(4, next.nom.length));
-      var nxTag = el('p', 'pp-next-tagline');
-      buildTagline(nxTag, next, 'proj.' + next.slug + '.intro-tagline');
       var nxLinks = el('div', 'pp-next-liens');
       var all = el('a', 'pp-next-lien', { href: '/pages/projets.html' /* CLEAN-URL: '/work' */, 'data-curseur': true, tabindex: '-1' });
       var allTxt = el('span', null, { 'data-i18n': 'home.viewall' });
@@ -286,7 +272,6 @@
       nxLinks.appendChild(contact);
       nx.appendChild(nxLabel);
       nx.appendChild(nxName);
-      nx.appendChild(nxTag);
       nx.appendChild(nxLinks);
       inner.appendChild(nx);
     }
