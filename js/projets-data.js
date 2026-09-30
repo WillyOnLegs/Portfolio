@@ -20,6 +20,7 @@ if(typeof window!=='undefined'){window.PROJETS=PROJETS;window.getProjetBySlug=ge
    Un média M :
      { src:'/medias/…', video:true, alt:'…' }
      options : fit:'contain', bg:'#hex', pad:'12%'  (logos, affiches…)
+               pos:'30% 50%'  (cadrage si l'image est recadrée)
 
    Placeholder (image du site prise au hasard, à remplacer) :
      { ph:'h' } → horizontale     { ph:'v' } → verticale
@@ -29,184 +30,233 @@ if(typeof window!=='undefined'){window.PROJETS=PROJETS;window.getProjetBySlug=ge
    ============================================================== */
 var PROJETS_SECTIONS = (function () {
   var P = '/medias/2.Projets/';
+  var CREME_IZI = '#f4efe4';
+  var CREME_BOOMER = '#e9e6dc';
+  function T(en, fr) { return { en: en, fr: fr }; }
   return {
     izidoor: [
-      { titre: { en: 'Context', fr: 'Contexte' }, blocs: [
+      { titre: T('Context', 'Contexte'), blocs: [
         { type: 'full', media: { src: P + 'Izidoor/P1-Explainer.mp4', video: true, alt: 'Izidoor — Explainer 2D, partie 1' } },
       ]},
-      { titre: { en: 'Logo', fr: 'Logo' }, blocs: [
+      { titre: T('Logo', 'Logo'), blocs: [
         { type: 'trio', side: 'right',
-          vertical: { src: P + 'Izidoor/Logo_Izidoor_Compact.png', alt: 'Izidoor — Logo compact', fit: 'contain', bg: '#f4efe4', pad: '22%' },
+          vertical: { src: P + 'Izidoor/Logo_Izidoor_Compact.png', alt: 'Izidoor — Logo compact', fit: 'contain', bg: CREME_IZI, pad: '24%' },
           horizontals: [
-            { src: P + 'Izidoor/Logo_Izidoor.png', alt: 'Izidoor — Logo principal', fit: 'contain', bg: '#f4efe4', pad: '12%' },
-            { src: P + 'Izidoor/Hero-Izidoor.png', alt: 'Izidoor — Visuel' },
+            { src: P + 'Izidoor/Logo_Izidoor.png', alt: 'Izidoor — Logo principal', fit: 'contain', bg: CREME_IZI, pad: '14%' },
+            { src: P + 'Izidoor/Hero-Izidoor.png', alt: 'Izidoor — Logo compact lumineux' },
           ] },
       ]},
-      { titre: { en: 'Guidelines', fr: 'Charte' }, blocs: [
-        { type: 'full', media: { src: P + 'Izidoor/CG-Izidoor-1.svg', alt: 'Izidoor — Charte graphique, page 1' } },
-        { type: 'full', media: { src: P + 'Izidoor/CG-Izidoor-2.svg', alt: 'Izidoor — Charte graphique, page 2' } },
+      { titre: T('Guidelines', 'Charte'), blocs: [
+        { type: 'full', media: { src: P + 'Izidoor/CG-Izidoor-1.svg', alt: 'Izidoor — Charte graphique, logo' } },
+        { type: 'full', media: { src: P + 'Izidoor/CG-Izidoor-2.svg', alt: 'Izidoor — Charte graphique, usages' } },
       ]},
-      { titre: { en: 'Icons', fr: 'Icônes' }, blocs: [
+      { titre: T('Icons', 'Icônes'), blocs: [
+        { type: 'full', media: { src: P + 'Izidoor/Icons/Icons_Set.webp', alt: 'Izidoor — Les 7 icônes activités' } },
         { type: 'trio', side: 'left',
-          vertical: { src: P + 'Izidoor/Icons/Icon_Escalade_Grid.png', alt: 'Izidoor — Icône Escalade', fit: 'contain', bg: '#f4efe4', pad: '14%' },
+          vertical: { src: P + 'Izidoor/Icons/Icon_Escalade_Grid.png', alt: 'Izidoor — Icône escalade, construction', fit: 'contain', bg: CREME_IZI, pad: '14%' },
           horizontals: [
-            { src: P + 'Izidoor/Icons/Icon_Rafting_Grid.png', alt: 'Izidoor — Icône Rafting', fit: 'contain', bg: '#f4efe4', pad: '10%' },
-            { src: P + 'Izidoor/Icons/Icon_Peche_Grid.png', alt: 'Izidoor — Icône Pêche', fit: 'contain', bg: '#f4efe4', pad: '10%' },
+            { src: P + 'Izidoor/Icons/Icon_Rafting_Grid.png', alt: 'Izidoor — Icône rafting, construction', fit: 'contain', bg: CREME_IZI, pad: '10%' },
+            { src: P + 'Izidoor/Icons/Icon_Peche_Grid.png', alt: 'Izidoor — Icône pêche, construction', fit: 'contain', bg: CREME_IZI, pad: '10%' },
+          ] },
+        { type: 'trio', side: 'right',
+          vertical: { src: P + 'Izidoor/Icons/Icon_Poterie_Grid.png', alt: 'Izidoor — Icône poterie, construction', fit: 'contain', bg: CREME_IZI, pad: '14%' },
+          horizontals: [
+            { src: P + 'Izidoor/Icons/Icon_Parapente_Grid.png', alt: 'Izidoor — Icône parapente, construction', fit: 'contain', bg: CREME_IZI, pad: '10%' },
+            { src: P + 'Izidoor/Icons/Icon_Surf_Grid.png', alt: 'Izidoor — Icône surf, construction', fit: 'contain', bg: CREME_IZI, pad: '10%' },
           ] },
       ]},
-      { titre: { en: 'Motion', fr: 'Motion' }, blocs: [
-        { type: 'trio', side: 'right',
-          vertical: { ph: 'v' },
+      { titre: T('Motion', 'Motion'), blocs: [
+        { type: 'full', media: { src: P + 'Izidoor/P2-Explainer.mp4', video: true, alt: 'Izidoor — Explainer 2D, partie 2' } },
+        { type: 'trio', side: 'left',
+          vertical: { src: P + 'Izidoor/Stills/calendar.webp', alt: 'Izidoor — Explainer, planning', pos: '55% 50%' },
           horizontals: [
-            { src: P + 'Izidoor/P1-Explainer.mp4', video: true, alt: 'Izidoor — Explainer 2D, partie 1' },
-            { src: P + 'Izidoor/P2-Explainer.mp4', video: true, alt: 'Izidoor — Explainer 2D, partie 2' },
+            { src: P + 'Izidoor/Stills/inbox.webp', alt: 'Izidoor — Explainer, confirmation' },
+            { src: P + 'Izidoor/Stills/bookings.webp', alt: 'Izidoor — Explainer, réservations' },
           ] },
       ]},
     ],
 
     boomer: [
-      { titre: { en: 'Brand', fr: 'Marque' }, blocs: [
-        { type: 'full', media: { src: P + 'BOOMER/Mockup-Tshirt.jpg', alt: 'BOOMER — Mockup t-shirt étiquette' } },
+      { titre: T('Brand', 'Marque'), blocs: [
+        { type: 'full', media: { src: P + 'BOOMER/Mockup-Tshirt.jpg', alt: 'BOOMER — Étiquette de t-shirt' } },
       ]},
-      { titre: { en: 'Logo', fr: 'Logo' }, blocs: [
+      { titre: T('Logo', 'Logo'), blocs: [
         { type: 'trio', side: 'left',
-          vertical: { src: P + 'BOOMER/CG-BOOMER.svg', alt: 'BOOMER — Planche logo', fit: 'contain', bg: '#ffffff', pad: '6%' },
+          vertical: { src: P + 'BOOMER/LogoCompact.png', alt: 'BOOMER — Logo compact', fit: 'contain', bg: CREME_BOOMER, pad: '20%' },
           horizontals: [
-            { src: P + 'BOOMER/Logo.png', alt: 'BOOMER — Logo principal', fit: 'contain', bg: '#ece9e2', pad: '14%' },
-            { src: P + 'BOOMER/LogoCompact.png', alt: 'BOOMER — Logo compact', fit: 'contain', bg: '#ece9e2', pad: '18%' },
+            { src: P + 'BOOMER/Logo.png', alt: 'BOOMER — Logo principal', fit: 'contain', bg: CREME_BOOMER, pad: '14%' },
+            { src: P + 'BOOMER/Mockup-Sweat.jpg', alt: 'BOOMER — Sweat brodé' },
           ] },
       ]},
-      { titre: { en: 'Guidelines', fr: 'Charte' }, blocs: [
-        { type: 'full', media: { src: P + 'BOOMER/CG-BOOMER-1.svg', alt: 'BOOMER — Charte graphique, page 1' } },
-        { type: 'full', media: { src: P + 'BOOMER/CG-BOOMER-2.svg', alt: 'BOOMER — Charte graphique, page 2' } },
-      ]},
-      { titre: { en: 'Apparel', fr: 'Textile' }, blocs: [
-        { type: 'trio', side: 'right',
-          vertical: { ph: 'v' },
-          horizontals: [
-            { src: P + 'BOOMER/Mockup-Sweat.jpg', alt: 'BOOMER — Mockup sweat brodé' },
-            { ph: 'h' },
-          ] },
+      { titre: T('Guidelines', 'Charte'), blocs: [
+        { type: 'full', media: { src: P + 'BOOMER/CG-BOOMER-1.svg', alt: 'BOOMER — Charte graphique, typographie et couleurs' } },
+        { type: 'full', media: { src: P + 'BOOMER/CG-BOOMER-2.svg', alt: 'BOOMER — Charte graphique, logo' } },
       ]},
     ],
 
     '24kmagic': [
-      { titre: { en: 'Film', fr: 'Film' }, blocs: [
+      { titre: T('Film', 'Film'), blocs: [
         { type: 'full', media: { src: P + '24Kmagic/24K%20Magic.mp4', video: true, alt: '24K Magic — Lyric video' } },
       ]},
-      { titre: { en: 'Art direction', fr: 'Direction artistique' }, blocs: [
-        { type: 'trio', side: 'left', vertical: { ph: 'v' }, horizontals: [{ ph: 'h' }, { ph: 'h' }] },
+      { titre: T('Kinetic type', 'Typo animée'), blocs: [
+        { type: 'trio', side: 'right',
+          vertical: { src: P + '24Kmagic/Stills/fall.webp', alt: '24K Magic — Might hurt yourself', pos: '0% 50%' },
+          horizontals: [
+            { src: P + '24Kmagic/Stills/showtime.webp', alt: '24K Magic — Showtime' },
+            { src: P + '24Kmagic/Stills/know-soon.webp', alt: "24K Magic — I'm bet they know" },
+          ] },
       ]},
-      { titre: { en: 'Frames', fr: 'Images clés' }, blocs: [
-        { type: 'full', media: { ph: 'h' } },
+      { titre: T('Illustration', 'Illustration'), blocs: [
+        { type: 'trio', side: 'left',
+          vertical: { src: P + '24Kmagic/Stills/dancers.webp', alt: '24K Magic — Danseurs' },
+          horizontals: [
+            { src: P + '24Kmagic/Stills/guess-who.webp', alt: "24K Magic — Guess who's back again" },
+            { src: P + '24Kmagic/Stills/shoes.webp', alt: "24K Magic — Inglewood's finest shoes" },
+          ] },
       ]},
     ],
 
     pschhh: [
-      { titre: { en: 'Film', fr: 'Film' }, blocs: [
-        { type: 'full', media: { src: P + 'Pschhh/Pschhh.mp4', video: true, alt: 'Pschhh — Publicité' } },
+      { titre: T('Film', 'Film'), blocs: [
+        { type: 'full', media: { src: P + 'Pschhh/Pschhh.mp4', video: true, alt: 'Pschhh — Publicité 3D' } },
       ]},
-      { titre: { en: 'Identity', fr: 'Identité' }, blocs: [
+      { titre: T('Identity', 'Identité'), blocs: [
         { type: 'full', media: { src: P + 'Pschhh/CG-PSCHHH.svg', alt: 'Pschhh — Charte graphique' } },
       ]},
-      { titre: { en: 'Clay & glass', fr: 'Clay & verre' }, blocs: [
+      { titre: T('3D render', 'Rendu 3D'), blocs: [
         { type: 'trio', side: 'right',
-          vertical: { ph: 'v' },
+          vertical: { src: P + 'Pschhh/Stills/side.webp', alt: 'Pschhh — Canette, gros plan' },
           horizontals: [
-            { src: P + 'Pschhh/PschhhClay.mp4', video: true, alt: 'Pschhh — Version clay' },
-            { src: P + 'Pschhh/Rendu-glacon.webp', alt: 'Pschhh — Geometry of air' },
+            { src: P + 'Pschhh/Stills/tab.webp', alt: 'Pschhh — Ouverture' },
+            { src: P + 'Pschhh/Stills/swirl.webp', alt: 'Pschhh — Liquide' },
+          ] },
+        { type: 'trio', side: 'left',
+          vertical: { src: P + 'Pschhh/Stills/can-top.webp', alt: 'Pschhh — Canette' },
+          horizontals: [
+            { src: P + 'Pschhh/Rendu-glacon.webp', alt: 'Pschhh — Rendu glaçons' },
+            { src: P + 'Pschhh/Stills/packshot.webp', alt: 'Pschhh — Packshot final' },
+          ] },
+      ]},
+      { titre: T('Clay', 'Clay'), blocs: [
+        { type: 'full', media: { src: P + 'Pschhh/PschhhClay.mp4', video: true, alt: 'Pschhh — Version clay' } },
+        { type: 'trio', side: 'right',
+          vertical: { src: P + 'Pschhh/Stills/clay-can.webp', alt: 'Pschhh — Clay, canette' },
+          horizontals: [
+            { src: P + 'Pschhh/Stills/clay-tab.webp', alt: 'Pschhh — Clay, ouverture' },
+            { src: P + 'Pschhh/Stills/clay-swirl.webp', alt: 'Pschhh — Clay, liquide' },
           ] },
       ]},
     ],
 
     teamspeak: [
-      { titre: { en: 'Return', fr: 'Le retour' }, blocs: [
-        { type: 'full', media: { src: P + 'teamspeak/Mockup-TS.webp', alt: 'TeamSpeak — Mockup' } },
+      { titre: T('Launch', 'Lancement'), blocs: [
+        { type: 'full', media: { src: P + 'teamspeak/Mockup-TS.webp', alt: 'TeamSpeak — Affiches en abribus' } },
       ]},
-      { titre: { en: 'Blue poster', fr: 'Affiche bleue' }, blocs: [
+      { titre: T('Blue poster', 'Affiche bleue'), blocs: [
         { type: 'trio', side: 'left',
-          vertical: { src: P + 'teamspeak/TS_Blue.webp', alt: 'TeamSpeak — Affiche bleue' },
-          horizontals: [{ ph: 'h' }, { ph: 'h' }] },
+          vertical: { src: P + 'teamspeak/TS_Blue.webp', alt: 'TeamSpeak — Affiche bleue', fit: 'contain', bg: '#0183d2' },
+          horizontals: [
+            { src: P + 'teamspeak/Details/Blue-prix.webp', alt: 'TeamSpeak — Affiche bleue, détail prix' },
+            { src: P + 'teamspeak/Details/Blue-slogan.webp', alt: 'TeamSpeak — Affiche bleue, détail slogan' },
+          ] },
       ]},
-      { titre: { en: 'Green poster', fr: 'Affiche verte' }, blocs: [
+      { titre: T('Green poster', 'Affiche verte'), blocs: [
         { type: 'trio', side: 'right',
-          vertical: { src: P + 'teamspeak/TS_Green.webp', alt: 'TeamSpeak — Affiche verte' },
-          horizontals: [{ ph: 'h' }, { ph: 'h' }] },
+          vertical: { src: P + 'teamspeak/TS_Green.webp', alt: 'TeamSpeak — Affiche verte', fit: 'contain', bg: '#00db4d' },
+          horizontals: [
+            { src: P + 'teamspeak/Details/Green-prix.webp', alt: 'TeamSpeak — Affiche verte, détail prix' },
+            { src: P + 'teamspeak/Details/Green-slogan.webp', alt: 'TeamSpeak — Affiche verte, détail slogan' },
+          ] },
       ]},
     ],
 
     mag: [
-      { titre: { en: 'Film', fr: 'Film' }, blocs: [
+      { titre: T('Film', 'Film'), blocs: [
         { type: 'full', media: { src: P + 'Mag/Mag.mp4', video: true, alt: 'The Mag — Vidéo de présentation' } },
       ]},
-      { titre: { en: 'Covers', fr: 'Couvertures' }, blocs: [
-        { type: 'trio', side: 'left',
-          vertical: { ph: 'v' },
+      { titre: T('Covers', 'Couvertures'), blocs: [
+        { type: 'trio', side: 'right',
+          vertical: { src: P + 'Mag/Stills/cover-tilt.webp', alt: 'The Mag — Couverture en situation', pos: '64% 50%' },
           horizontals: [
-            { src: P + 'Mag/Couverture.png', alt: 'The Mag — Couverture', fit: 'contain', bg: '#e9e6e0', pad: '6%' },
-            { src: P + 'Mag/4emeCouverture.png', alt: 'The Mag — 4ème de couverture', fit: 'contain', bg: '#e9e6e0', pad: '6%' },
+            { src: P + 'Mag/Couvertures.webp', alt: 'The Mag — 1re et 4e de couverture' },
+            { src: P + 'Mag/Stills/cover-flat.webp', alt: 'The Mag — Couverture et titre' },
           ] },
       ]},
-      { titre: { en: 'Spreads', fr: 'Doubles pages' }, blocs: [
-        { type: 'full', media: { src: P + 'Mag/Magazine2.png', alt: 'The Mag — Planche 2' } },
-        { type: 'trio', side: 'right',
-          vertical: { ph: 'v' },
+      { titre: T('Spreads', 'Doubles pages'), blocs: [
+        { type: 'full', media: { src: P + 'Mag/Magazine2.png', alt: 'The Mag — Sommaire', fit: 'contain', bg: '#0f0f0f' } },
+        { type: 'trio', side: 'left',
+          vertical: { src: P + 'Mag/Stills/flip.webp', alt: 'The Mag — Pages qui tournent', pos: '40% 50%' },
           horizontals: [
-            { src: P + 'Mag/Magazine3.png', alt: 'The Mag — Planche 3' },
-            { src: P + 'Mag/Magazine4.png', alt: 'The Mag — Planche 4' },
+            { src: P + 'Mag/Stills/spread.webp', alt: 'The Mag — Double page ouverte' },
+            { src: P + 'Mag/Stills/disco.webp', alt: 'The Mag — Discographie' },
           ] },
+        { type: 'full', media: { src: P + 'Mag/Magazine3.png', alt: 'The Mag — Biographie', fit: 'contain', bg: '#0f0f0f' } },
+        { type: 'full', media: { src: P + 'Mag/Magazine4.png', alt: 'The Mag — Discographie', fit: 'contain', bg: '#0f0f0f' } },
       ]},
     ],
 
     eurockeenes: [
-      { titre: { en: 'Logo', fr: 'Logo' }, blocs: [
-        { type: 'full', media: { src: P + 'Eurockeenes/Logo%20Eurock%27Pass.mp4', video: true, alt: "Eurockéennes — Logo animé" } },
+      { titre: T('Logo', 'Logo'), blocs: [
+        { type: 'full', media: { src: P + 'Eurockeenes/Logo%20Eurock%27Pass.mp4', video: true, alt: "Eurock'Pass — Logo animé" } },
       ]},
-      { titre: { en: 'Guidelines', fr: 'Charte' }, blocs: [
-        { type: 'full', media: { src: P + 'Eurockeenes/CG-EUROCKEENNES.svg', alt: 'Eurockéennes — Charte graphique' } },
+      { titre: T('Guidelines', 'Charte'), blocs: [
+        { type: 'full', media: { src: P + 'Eurockeenes/CG-EUROCKEENNES.svg', alt: "Eurock'Pass — Charte graphique" } },
       ]},
-      { titre: { en: 'App', fr: 'Application' }, blocs: [
+      { titre: T('App', 'Application'), blocs: [
         { type: 'trio', side: 'right',
-          vertical: { src: P + 'Eurockeenes/mockup-application.webp', alt: 'Eurockéennes — Mockup application' },
-          horizontals: [{ ph: 'h' }, { ph: 'h' }] },
+          vertical: { src: P + 'Eurockeenes/mockup-application.webp', alt: "Eurock'Pass — Application", fit: 'contain', bg: '#448254', pad: '6%' },
+          horizontals: [
+            { src: P + 'Eurockeenes/Stills/drawing.webp', alt: "Eurock'Pass — Logo en cours de tracé" },
+            { src: P + 'Eurockeenes/Stills/logo.webp', alt: "Eurock'Pass — Logo final" },
+          ] },
       ]},
     ],
 
     timeless: [
-      { titre: { en: 'Film', fr: 'Film' }, blocs: [
+      { titre: T('Cover', 'Pochette'), blocs: [
+        { type: 'full', media: { src: P + 'Timeless/Cover-Timeless.webp', alt: 'Timeless — Cover' } },
+      ]},
+      { titre: T('Film', 'Film'), blocs: [
         { type: 'full', media: { src: P + 'Timeless/Timeless.mp4', video: true, alt: 'Timeless — Lyric video' } },
       ]},
-      { titre: { en: 'Art direction', fr: 'Direction artistique' }, blocs: [
+      { titre: T('Art direction', 'Direction artistique'), blocs: [
         { type: 'trio', side: 'left',
-          vertical: { ph: 'v' },
+          vertical: { src: P + 'Timeless/Stills/woman-1.webp', alt: 'Timeless — Silhouette' },
           horizontals: [
-            { src: P + 'Timeless/Cover-Timeless.webp', alt: 'Timeless — Cover' },
-            { ph: 'h' },
+            { src: P + 'Timeless/Stills/kid.webp', alt: 'Timeless — Ever since I was a kid' },
+            { src: P + 'Timeless/Stills/legit.webp', alt: 'Timeless — I been legit' },
           ] },
       ]},
     ],
 
     low: [
-      { titre: { en: 'Logo', fr: 'Logo' }, blocs: [
-        { type: 'full', media: { src: P + 'LOW/Logo_3.mp4', video: true, alt: 'LOW — Logo animé' } },
-      ]},
-      { titre: { en: 'Album cover', fr: 'Pochette' }, blocs: [
-        { type: 'trio', side: 'right',
-          vertical: { src: P + 'LOW/maneken-OHGP07.webp', alt: 'maneken — OHGP07' },
+      { titre: T('Logo', 'Logo'), blocs: [
+        { type: 'full', media: { src: P + 'LOW/Logo_3.mp4', video: true, alt: 'LOW — Logo animé 3D' } },
+        { type: 'trio', side: 'left',
+          vertical: { src: P + 'LOW/Stills/logo-macro.webp', alt: 'LOW — Logo 3D, gros plan' },
           horizontals: [
-            { src: P + 'LOW/Visuel%20(cover-album).webp', alt: 'maneken — Cover album LOW' },
-            { src: P + 'LOW/maneken-STDIO1.webp', alt: 'maneken — Studio I' },
+            { src: P + 'LOW/Logo.webp', alt: 'LOW — Logo' },
+            { src: P + 'LOW/Stills/logo-turn.webp', alt: 'LOW — Logo 3D, rotation' },
           ] },
       ]},
-      { titre: { en: 'Guidelines', fr: 'Charte' }, blocs: [
+      { titre: T('Album cover', 'Pochette'), blocs: [
+        { type: 'full', media: { src: P + 'LOW/Visuel%20(cover-album).webp', alt: 'maneken — Pochette de LOW', fit: 'contain', bg: '#000000' } },
+      ]},
+      { titre: T('Guidelines', 'Charte'), blocs: [
         { type: 'full', media: { src: P + 'LOW/CG-LOW.svg', alt: 'LOW — Charte graphique' } },
       ]},
-      { titre: { en: 'Merch', fr: 'Merch' }, blocs: [
-        { type: 'trio', side: 'left',
-          vertical: { src: P + 'LOW/maneken-61FI089.webp', alt: 'maneken — 61FI089' },
+      { titre: T('Merch', 'Merch'), blocs: [
+        { type: 'trio', side: 'right',
+          vertical: { src: P + 'LOW/maneken-OHGP07.webp', alt: 'maneken — Hoodie' },
           horizontals: [
+            { src: P + 'LOW/maneken-STDIO1.webp', alt: 'maneken — Tote bag' },
             { src: P + 'LOW/maneken-Socks.webp', alt: 'maneken — Chaussettes' },
-            { src: P + 'LOW/maneken-TshirtFrontFlat2.webp', alt: 'maneken — T-shirt' },
+          ] },
+        { type: 'trio', side: 'left',
+          vertical: { src: P + 'LOW/maneken-61FI089.webp', alt: 'maneken — Tote bag en extérieur' },
+          horizontals: [
+            { src: P + 'LOW/maneken-STDIO2.webp', alt: 'maneken — T-shirt, dos' },
+            { src: P + 'LOW/maneken-TshirtFrontFlat2.webp', alt: 'maneken — T-shirt, face' },
           ] },
       ]},
     ],

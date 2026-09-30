@@ -118,6 +118,7 @@
       fig.classList.add('pp-cell--contain');
       if (m.pad) media.style.padding = m.pad;
     }
+    if (m.pos) media.style.objectPosition = m.pos;
     return fig;
   }
 
