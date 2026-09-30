@@ -20,6 +20,8 @@ if(typeof window!=='undefined'){window.PROJETS=PROJETS;window.getProjetBySlug=ge
    Un média M :
      { src:'/medias/…', video:true, alt:'…' }
      options : fit:'contain', bg:'#hex', pad:'12%'  (logos, affiches…)
+               son:true  (vidéo avec musique → affiche le bouton son,
+                          coupé par défaut)
                pos:'30% 50%'  (cadrage si l'image est recadrée)
 
    Placeholder (image du site prise au hasard, à remplacer) :
@@ -126,7 +128,7 @@ var PROJETS_SECTIONS = (function () {
 
     '24kmagic': [
       { titre: T('Film', 'Film'), blocs: [
-        { type: 'full', media: { src: P + '24Kmagic/24K%20Magic.mp4', video: true, alt: '24K Magic — Lyric video' } },
+        { type: 'full', media: { src: P + '24Kmagic/24K%20Magic.mp4', video: true, son: true, alt: '24K Magic — Lyric video' } },
       ]},
       { titre: T('Kinetic type', 'Typo animée'), blocs: [
         { type: 'trio', side: 'right',
@@ -148,7 +150,7 @@ var PROJETS_SECTIONS = (function () {
 
     pschhh: [
       { titre: T('Film', 'Film'), blocs: [
-        { type: 'full', media: { src: P + 'Pschhh/Pschhh.mp4', video: true, alt: 'Pschhh — Publicité 3D' } },
+        { type: 'full', media: { src: P + 'Pschhh/Pschhh.mp4', video: true, son: true, alt: 'Pschhh — Publicité 3D' } },
       ]},
       { titre: T('Identity', 'Identité'), blocs: [
         { type: 'full', media: { src: P + 'Pschhh/CG-PSCHHH.svg', alt: 'Pschhh — Charte graphique' } },
@@ -247,7 +249,7 @@ var PROJETS_SECTIONS = (function () {
         { type: 'full', media: { src: P + 'Timeless/Cover-Timeless.webp', alt: 'Timeless — Cover' } },
       ]},
       { titre: T('Film', 'Film'), blocs: [
-        { type: 'full', media: { src: P + 'Timeless/Timeless.mp4', video: true, alt: 'Timeless — Lyric video' } },
+        { type: 'full', media: { src: P + 'Timeless/Timeless.mp4', video: true, son: true, alt: 'Timeless — Lyric video' } },
       ]},
       { titre: T('Art direction', 'Direction artistique'), blocs: [
         { type: 'trio', side: 'left',
@@ -261,7 +263,7 @@ var PROJETS_SECTIONS = (function () {
 
     low: [
       { titre: T('Logo', 'Logo'), blocs: [
-        { type: 'full', media: { src: P + 'LOW/Logo_3.mp4', video: true, alt: 'LOW — Logo animé 3D' } },
+        { type: 'full', media: { src: P + 'LOW/Logo_3.mp4', video: true, son: true, alt: 'LOW — Logo animé 3D' } },
         { type: 'trio', side: 'left',
           vertical: { src: P + 'LOW/Stills/logo-macro.webp', alt: 'LOW — Logo 3D, gros plan' },
           horizontals: [

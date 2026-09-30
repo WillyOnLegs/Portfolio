@@ -98,18 +98,34 @@
     var media;
     if (m.video) {
       fig.classList.add('pp-cell--video');
-      fig.setAttribute('data-curseur', '');
-      media = el('video', 'pp-media', { muted: true, loop: true, playsinline: true, preload: 'metadata', 'aria-label': m.alt || null });
+      media = el('video', 'pp-media', {
+        muted: true, loop: true, playsinline: true, preload: 'metadata',
+        disablepictureinpicture: true, disableremoteplayback: true,
+        controlslist: 'nofullscreen nodownload noremoteplayback',
+        'aria-label': m.alt || null
+      });
       media.muted = true;
       media.loop = true;
       media.playsInline = true;
       media.appendChild(el('source', null, { src: src, type: 'video/mp4' }));
       fig.appendChild(media);
-      var ctrl = el('button', 'pp-cell-ctrl', { type: 'button', 'aria-label': 'Pause', 'data-curseur': true });
+
+      // Boutons en bas à droite : [son] [pause]
+      var ctrls = el('div', 'pp-cell-ctrls');
+      if (m.son) {
+        fig.classList.add('pp-cell--son', 'is-muted');
+        var son = el('button', 'pp-cell-ctrl pp-cell-son', { type: 'button', 'aria-label': t('pp.son.on', 'Activer le son'), 'aria-pressed': 'false', 'data-curseur': true });
+        son.innerHTML =
+          '<svg class="pp-ico-muet" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' +
+          '<svg class="pp-ico-son" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+        ctrls.appendChild(son);
+      }
+      var ctrl = el('button', 'pp-cell-ctrl pp-cell-pause', { type: 'button', 'aria-label': 'Pause', 'data-curseur': true });
       ctrl.innerHTML =
         '<svg class="pp-ico-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="5" width="3.2" height="14" rx="1"/><rect x="13.8" y="5" width="3.2" height="14" rx="1"/></svg>' +
         '<svg class="pp-ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
-      fig.appendChild(ctrl);
+      ctrls.appendChild(ctrl);
+      fig.appendChild(ctrls);
     } else {
       media = el('img', 'pp-media', { src: src, alt: m.alt || '', loading: 'lazy', decoding: 'async' });
       fig.appendChild(media);
@@ -435,11 +451,16 @@
     });
   }
 
-  /* ---------- Vidéos : lecture dans le champ, pause, plein écran ---------- */
+  /* ---------- Vidéos : lecture dans le champ, pause, son ---------- */
+  // Pas de plein écran : les vidéos restent toujours dans leur case.
+  // Son coupé par défaut ; une seule vidéo peut avoir le son à la fois.
 
   function initVideos(root, scroller, cleanups) {
     var cells = root.querySelectorAll('.pp-cell--video, .pp-outro-card');
     if (!cells.length) return;
+
+    registerI18n('pp.son.on', { fr: 'Activer le son', en: 'Turn sound on' });
+    registerI18n('pp.son.off', { fr: 'Couper le son', en: 'Mute' });
 
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
@@ -448,7 +469,6 @@
         if (!v) return;
         if (e.isIntersecting && e.intersectionRatio >= 0.25) {
           if (cell.dataset.userPaused === '1') return;
-          if (!document.fullscreenElement) v.muted = true;
           var pr = v.play();
           if (pr && pr.catch) pr.catch(function () {});
         } else if (!e.isIntersecting || e.intersectionRatio < 0.05) {
@@ -457,11 +477,22 @@
       });
     }, { root: scroller.ioRoot, threshold: [0, 0.05, 0.25, 0.6] });
 
+    function setSon(cell, on) {
+      var v = cell.querySelector('video');
+      var btn = cell.querySelector('.pp-cell-son');
+      if (!v || !btn) return;
+      v.muted = !on;
+      cell.classList.toggle('is-muted', !on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.setAttribute('aria-label', t(on ? 'pp.son.off' : 'pp.son.on'));
+    }
+
     cells.forEach(function (cell) {
       io.observe(cell);
       if (!cell.classList.contains('pp-cell--video')) return;
       var v = cell.querySelector('video');
-      var ctrl = cell.querySelector('.pp-cell-ctrl');
+      var ctrl = cell.querySelector('.pp-cell-pause');
+      var son = cell.querySelector('.pp-cell-son');
 
       if (ctrl) {
         ctrl.addEventListener('click', function (e) {
@@ -481,37 +512,29 @@
         });
       }
 
-      // Clic sur la vidéo : plein écran avec le son (selon la préférence son du site)
-      cell.addEventListener('click', function (e) {
-        if (e.target.closest('.pp-cell-ctrl')) return;
-        var req = v.requestFullscreen || v.webkitRequestFullscreen || v.webkitEnterFullscreen;
-        if (!req) return;
-        var sonOff = (typeof sonActuel !== 'undefined' && sonActuel === 'off');
-        try { v.currentTime = 0; } catch (_) {}
-        v.muted = sonOff;
-        v.setAttribute('controls', '');
-        var res = req.call(v);
-        v.play().catch(function () {});
-        if (res && res.catch) res.catch(function () { v.muted = true; v.removeAttribute('controls'); });
-      });
+      if (son) {
+        son.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var on = v.muted;
+          if (on) {
+            // une seule vidéo sonore à la fois
+            root.querySelectorAll('.pp-cell--son').forEach(function (c) { if (c !== cell) setSon(c, false); });
+          }
+          setSon(cell, on);
+          if (on && v.paused) {
+            cell.dataset.userPaused = '0';
+            cell.classList.remove('is-paused');
+            if (ctrl) ctrl.setAttribute('aria-label', 'Pause');
+            v.play().catch(function () {});
+          }
+        });
+      }
     });
-
-    function onFsChange() {
-      if (document.fullscreenElement || document.webkitFullscreenElement) return;
-      root.querySelectorAll('.pp-cell--video video').forEach(function (v) {
-        v.removeAttribute('controls');
-        v.muted = true;
-        v.loop = true;
-      });
-    }
-    document.addEventListener('fullscreenchange', onFsChange);
-    document.addEventListener('webkitfullscreenchange', onFsChange);
 
     cleanups.push(function () {
       io.disconnect();
-      document.removeEventListener('fullscreenchange', onFsChange);
-      document.removeEventListener('webkitfullscreenchange', onFsChange);
-      root.querySelectorAll('video').forEach(function (v) { try { v.pause(); } catch (_) {} });
+      root.querySelectorAll('video').forEach(function (v) { try { v.muted = true; v.pause(); } catch (_) {} });
     });
   }
 

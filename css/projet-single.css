@@ -471,15 +471,18 @@
   object-fit: contain
 }
 
-.pp-cell--video {
-  cursor: pointer
-}
-
-/* Bouton pause / lecture des vidéos */
-.pp-cell-ctrl {
+/* Boutons des vidéos, en bas à droite : [son] [pause]
+   Le bouton son n'existe que sur les vidéos qui ont vraiment du son. */
+.pp-cell-ctrls {
   position: absolute;
   right: clamp(.6rem, 1vw, 1rem);
   bottom: clamp(.6rem, 1vw, 1rem);
+  z-index: 2;
+  display: flex;
+  gap: .4rem
+}
+
+.pp-cell-ctrl {
   width: 2.1rem;
   height: 2.1rem;
   display: grid;
@@ -493,7 +496,7 @@
   color: #fff;
   cursor: pointer;
   opacity: .65;
-  transition: opacity .3s ease, background .3s ease
+  transition: opacity .3s ease, background .3s ease, border-color .3s ease
 }
 
 .pp-cell--video:hover .pp-cell-ctrl,
@@ -506,13 +509,39 @@
   height: .85rem
 }
 
+.pp-cell-son svg {
+  width: 1rem;
+  height: 1rem
+}
+
+/* Son coupé : le bouton appelle un peu le regard, sans crier */
+.pp-cell--son.is-muted .pp-cell-son {
+  opacity: .9
+}
+
+/* Son actif : bouton plein, pour qu'on sache d'où vient la musique */
+.pp-cell--son:not(.is-muted) .pp-cell-son {
+  opacity: 1;
+  background: #fff;
+  border-color: #fff;
+  color: #0a0a0a
+}
+
 .pp-cell-ctrl .pp-ico-play,
-.pp-cell--video.is-paused .pp-cell-ctrl .pp-ico-pause {
+.pp-cell--video.is-paused .pp-cell-ctrl .pp-ico-pause,
+.pp-cell-son .pp-ico-son,
+.pp-cell--son.is-muted .pp-cell-son .pp-ico-son {
   display: none
 }
 
-.pp-cell--video.is-paused .pp-cell-ctrl .pp-ico-play {
+.pp-cell--video.is-paused .pp-cell-ctrl .pp-ico-play,
+.pp-cell--son:not(.is-muted) .pp-cell-son .pp-ico-son,
+.pp-cell--son.is-muted .pp-cell-son .pp-ico-muet {
   display: block
+}
+
+.pp-cell--son:not(.is-muted) .pp-cell-son .pp-ico-muet {
+  display: none
 }
 
 /* --------------------------------------------------------------
@@ -643,7 +672,8 @@
 }
 
 .pp .pp-cell-ctrl:focus-visible {
-  border-radius: 50%
+  border-radius: 50%;
+  outline-offset: 3px
 }
 
 /* --------------------------------------------------------------
