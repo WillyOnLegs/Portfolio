@@ -37,45 +37,30 @@ var PROJETS_SECTIONS = (function () {
     flouz: [
       { titre: T('Logo', 'Logo'), blocs: [
         { type: 'full', media: { src: P + 'Flouz/LogoGlobal.mp4', video: true, alt: 'Flouz — Logo animé' } },
-        { type: 'trio', side: 'left',
-          vertical: { src: P + 'Flouz/Stills/micro.webp', alt: 'Flouz — Micro' },
-          horizontals: [
-            { src: P + 'Flouz/Motif.webp', alt: 'Flouz — Logo sur le motif' },
-            { src: P + 'Flouz/Styletile-Flouz1.webp', alt: 'Flouz — Logo et couleurs' },
-          ] },
-      ]},
-      { titre: T('Guidelines', 'Charte'), blocs: [
-        { type: 'full', media: { src: P + 'Flouz/Font.mp4', video: true, alt: 'Flouz — Bricolage Grotesque' } },
-        { type: 'full', media: { src: P + 'Flouz/Styletile-Flouz.webp', alt: 'Flouz — Typographies et icônes' } },
-        { type: 'full', media: { src: P + 'Flouz/Livret.webp', alt: 'Flouz — Livret de marque' } },
       ]},
       { titre: T('Cards', 'Cartes'), blocs: [
-        { type: 'full', media: { src: P + 'Flouz/BlueCard.jpg', alt: 'Flouz — Carte bleue transparente' } },
-        { type: 'full', media: { src: P + 'Flouz/WhiteCard.webp', alt: 'Flouz — Carte blanche transparente' } },
-        { type: 'full', media: { src: P + 'Flouz/BlackCard.webp', alt: 'Flouz — Carte noire transparente' } },
-      ]},
-      { titre: T('App', 'Application'), blocs: [
-        { type: 'trio', side: 'right',
-          vertical: { src: P + 'Flouz/Appstore.webp', alt: "Flouz — Fiche App Store" },
+        { type: 'trio', side: 'left',
+          vertical: { src: P + 'Flouz/WhiteCard.webp', alt: 'Flouz — Carte blanche transparente', pos: '45% 50%' },
           horizontals: [
-            { src: P + 'Flouz/App.webp', alt: "Flouz — Icône de l'app" },
-            { src: P + 'Flouz/ApplePay.mp4', video: true, alt: 'Flouz — Paiement Apple Pay' },
+            { src: P + 'Flouz/BlackCard.webp', alt: 'Flouz — Carte noire transparente' },
+            { src: P + 'Flouz/BlueCard.jpg', alt: 'Flouz — Carte bleue transparente' },
           ] },
       ]},
       { titre: T('Touchpoints', 'Déclinaisons'), blocs: [
         { type: 'full', media: { src: P + 'Flouz/Mockup.mp4', video: true, alt: 'Flouz — Déclinaisons' } },
-        { type: 'trio', side: 'left',
-          vertical: { src: P + 'Flouz/Stills/watch.webp', alt: 'Flouz — Montre' },
-          horizontals: [
-            { src: P + 'Flouz/Stills/bus.webp', alt: 'Flouz — Bus' },
-            { src: P + 'Flouz/Stills/wall.webp', alt: 'Flouz — Bureaux' },
-          ] },
+      ]},
+      { titre: T('App', 'Application'), blocs: [
         { type: 'trio', side: 'right',
-          vertical: { src: P + 'Flouz/Stills/badge.webp', alt: 'Flouz — Badge' },
+          vertical: { src: P + 'Flouz/Appstore.webp', alt: 'Flouz — Fiche App Store' },
           horizontals: [
-            { src: P + 'Flouz/Stills/window.webp', alt: 'Flouz — Vitrine' },
-            { src: P + 'Flouz/Stills/sticker.webp', alt: 'Flouz — Sticker' },
+            { src: P + 'Flouz/App.webp', alt: "Flouz — Icône sur l'écran d'accueil" },
+            { src: P + 'Flouz/ApplePay.mp4', video: true, alt: 'Flouz — Paiement Apple Pay' },
           ] },
+      ]},
+      { titre: T('Guidelines', 'Charte'), blocs: [
+        { type: 'full', media: { src: P + 'Flouz/Styletile-Flouz1.webp', alt: 'Flouz — Couleurs' } },
+        { type: 'full', media: { src: P + 'Flouz/Styletile-Flouz.webp', alt: 'Flouz — Typographies et icônes' } },
+        { type: 'full', media: { src: P + 'Flouz/Font.mp4', video: true, alt: 'Flouz — Bricolage Grotesque' } },
       ]},
     ],
 
