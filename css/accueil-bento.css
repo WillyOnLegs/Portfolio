@@ -15,57 +15,36 @@
   padding-bottom: 30vh
 }
 
-/* ---------- 1. Bento à propos ---------- */
+/* ---------- 1. Passage noir -> blanc, puis bento à propos ---------- */
 
+/* Comme sur grapheine.com : arrivé à un certain point du scroll,
+   le fond et le texte basculent ensemble en fondu (≈ 1 s),
+   et reviennent si on remonte. Le bento arrive juste après. */
 .ab-wrap {
   --ab-gap: clamp(.5rem, .8vw, .9rem);
   --ab-radius: clamp(1rem, 1.6vw, 1.75rem);
   --ab-pad: clamp(1.3rem, 2.2vw, 2.5rem);
   position: relative;
-  height: 230vh;
-  background: var(--blanc);
-  z-index: 1
-}
-
-.ab-stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden;
-  isolation: isolate;
-  --t: 0
-}
-
-.ab-fond-noir,
-.ab-fond-blanc {
-  position: absolute;
-  inset: 0
-}
-
-.ab-fond-noir {
+  z-index: 1;
+  --ab-fg: var(--blanc);
   background: var(--noir);
-  z-index: 1
+  color: var(--blanc);
+  transition: background-color 1s cubic-bezier(.4, 0, .2, 1), color 1s cubic-bezier(.4, 0, .2, 1)
 }
 
-/* Le blanc monte depuis le bas */
-.ab-fond-blanc {
+.ab-wrap.is-clair {
+  --ab-fg: var(--noir);
   background: var(--blanc);
-  z-index: 2;
-  clip-path: inset(calc((1 - var(--t)) * 100%) 0 0 0);
-  -webkit-clip-path: inset(calc((1 - var(--t)) * 100%) 0 0 0);
-  will-change: clip-path
+  color: var(--noir)
 }
 
-/* Tout le contenu est blanc en mode « différence » :
-   blanc sur le noir, noir sur le blanc, et coupé net sur la ligne */
+/* L'espace où se fait le passage, avant que le bento arrive */
+.ab-respiration {
+  height: 70vh
+}
+
 .ab-contenu {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  padding: clamp(6rem, 13vh, 8rem) var(--marge-nav) var(--marge-nav);
-  color: #fff;
-  mix-blend-mode: difference
+  padding: clamp(6rem, 13vh, 8rem) var(--marge-nav) var(--marge-nav)
 }
 
 .bento {
@@ -73,7 +52,9 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-rows: 1fr 1fr auto;
   gap: var(--ab-gap);
-  height: 100%;
+  height: calc(100vh - clamp(6rem, 13vh, 8rem) - var(--marge-nav));
+  height: calc(100svh - clamp(6rem, 13vh, 8rem) - var(--marge-nav));
+  min-height: 600px;
   max-width: 1680px;
   margin: 0 auto
 }
@@ -85,7 +66,8 @@
   overflow: hidden;
   border: 1px solid currentColor;
   border-radius: var(--ab-radius);
-  padding: var(--ab-pad)
+  padding: var(--ab-pad);
+  transition: border-color 1s cubic-bezier(.4, 0, .2, 1)
 }
 
 .bt-intro  { grid-column: 1 / span 8; grid-row: 1 / span 2 }
@@ -259,7 +241,7 @@
 
 .bk-item--tool {
   color: transparent;
-  -webkit-text-stroke: 1px #fff
+  -webkit-text-stroke: 1px var(--ab-fg)
 }
 
 .bk-sep {
@@ -497,23 +479,17 @@
   transform: translate(3px, -3px)
 }
 
-/* Aperçu quand la carte est petite */
+/* Quand la carte est petite : seule la flèche, le titre
+   « Let's work together. » voyage jusqu'à sa place finale */
 .ct-preview {
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: clamp(1rem, 1.6vw, 1.5rem);
+  padding: 0;
   border: 0;
-  background: var(--noir);
+  background: transparent;
   color: var(--blanc);
-  text-align: left;
-  cursor: pointer;
-  opacity: calc(1 - var(--ct-p, 0) * 2.4);
-  font: inherit
+  cursor: pointer
 }
 
 .ct-wrap.is-open .ct-preview {
@@ -521,36 +497,37 @@
   visibility: hidden
 }
 
-.ct-preview-label {
-  font-size: .7rem;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  opacity: .6
-}
-
-.ct-preview-titre {
-  font-family: var(--font-titre);
-  text-transform: uppercase;
-  font-size: clamp(1.5rem, 2.3vw, 2.6rem);
-  line-height: .95;
-  max-width: 70%
-}
-
 .ct-preview-fleche {
   position: absolute;
   right: clamp(1rem, 1.6vw, 1.5rem);
-  bottom: clamp(1rem, 1.6vw, 1.5rem);
+  top: clamp(1rem, 1.6vw, 1.5rem);
   display: grid;
   place-items: center;
   width: 2.6rem;
   height: 2.6rem;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .35)
+  border: 1px solid rgba(255, 255, 255, .35);
+  opacity: calc(1 - var(--ct-p, 0) * 4)
 }
 
 .ct-preview-fleche svg {
   width: 40%;
   height: 40%
+}
+
+/* Le titre bouge par transform (calculé en JS) */
+.ct-titre {
+  align-self: flex-start;
+  position: relative;
+  z-index: 3;
+  transform-origin: 0 0;
+  will-change: transform
+}
+
+/* Le reste du contenu arrive à la fin de l'agrandissement */
+.ct-fade {
+  opacity: var(--ct-fade, 1);
+  transform: translateY(calc((1 - var(--ct-fade, 1)) * 1.5rem))
 }
 
 .ab-wrap a:focus-visible,
@@ -563,26 +540,19 @@
 /* ---------- Mobile / tablette : pas d'effets épinglés ---------- */
 
 @media (max-width: 900px) {
-  .ab-wrap {
-    height: auto
-  }
-
-  .ab-stage {
-    position: relative;
-    height: auto;
-    overflow: visible
+  .ab-respiration {
+    height: 45vh
   }
 
   .ab-contenu {
-    position: relative;
-    inset: auto;
-    padding: clamp(4rem, 12vw, 6rem) var(--marge-nav) clamp(3rem, 10vw, 5rem)
+    padding: clamp(3rem, 10vw, 5rem) var(--marge-nav) clamp(3rem, 10vw, 5rem)
   }
 
   .bento {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: none;
-    height: auto
+    height: auto;
+    min-height: 0
   }
 
   .bt-intro  { grid-column: 1 / -1; grid-row: auto }

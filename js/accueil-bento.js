@@ -20,27 +20,25 @@
   }
 
   var abWrap = document.querySelector('.ab-wrap');
-  var abStage = document.querySelector('.ab-stage');
   var ctWrap = document.querySelector('.ct-wrap');
   var ctStage = document.querySelector('.ct-stage');
   var ctCard = document.querySelector('.ct-card');
   var ctInner = document.querySelector('.ct-inner');
+  var ctTitre = document.querySelector('.ct-titre');
   var ctPreview = document.querySelector('.ct-preview');
 
-  /* ---------- Bento : noir -> blanc ---------- */
+  /* ---------- Passage noir -> blanc (façon grapheine) ---------- */
+  // Bascule en fondu quand le haut de la zone atteint le haut de l'écran,
+  // retour au noir si on remonte (petite marge pour éviter les clignotements).
+  var clair = false;
   function majFond() {
-    if (!abWrap || !abStage) return;
-    var r = abWrap.getBoundingClientRect();
+    if (!abWrap) return;
+    var top = abWrap.getBoundingClientRect().top;
     var vh = window.innerHeight;
-    var tt;
-    if (MQ_DESKTOP.matches) {
-      var zone = abWrap.offsetHeight - vh;
-      // petit temps d'arrêt sur le noir, puis le blanc monte, puis on garde le blanc
-      tt = zone > 0 ? clamp01((-r.top - zone * 0.12) / (zone * 0.7)) : 1;
-    } else {
-      tt = clamp01((vh * 0.65 - r.top) / (r.height * 0.75));
-    }
-    abStage.style.setProperty('--t', (REDUCED ? (tt > 0.5 ? 1 : 0) : tt).toFixed(4));
+    var seuil = MQ_DESKTOP.matches ? vh * 0.08 : vh * 0.3;
+    if (!clair && top <= seuil) clair = true;
+    else if (clair && top > seuil + vh * 0.08) clair = false;
+    abWrap.classList.toggle('is-clair', clair);
   }
 
   /* ---------- Contact : la carte grandit ---------- */
@@ -52,12 +50,26 @@
     if ('inert' in ctInner) ctInner.inert = !on;
   }
 
+  // Position finale du titre (dans la mise en page plein écran)
+  var fin = null;
+  function mesurerTitre() {
+    if (!ctTitre || !ctInner) return;
+    var prev = ctTitre.style.transform;
+    ctTitre.style.transform = 'none';
+    var r = ctTitre.getBoundingClientRect();
+    var ir = ctInner.getBoundingClientRect();
+    fin = { x: r.left - ir.left, y: r.top - ir.top, w: r.width, h: r.height };
+    ctTitre.style.transform = prev;
+  }
+
   function majContact() {
     if (!ctWrap || !ctCard || !ctInner) return;
     if (!MQ_DESKTOP.matches) {
       ctCard.removeAttribute('style');
       ctInner.removeAttribute('style');
+      if (ctTitre) ctTitre.style.transform = '';
       ctWrap.style.removeProperty('--ct-p');
+      ctWrap.style.removeProperty('--ct-fade');
       setOuvert(true);
       return;
     }
@@ -76,32 +88,50 @@
 
     var x = x0 * (1 - e);
     var y = y0 * (1 - e);
+    var w = w0 + (W - w0) * e;
+    var h = h0 + (H - h0) * e;
     ctCard.style.left = x + 'px';
     ctCard.style.top = y + 'px';
-    ctCard.style.width = (w0 + (W - w0) * e) + 'px';
-    ctCard.style.height = (h0 + (H - h0) * e) + 'px';
+    ctCard.style.width = w + 'px';
+    ctCard.style.height = h + 'px';
     ctCard.style.setProperty('--ct-r', (20 * (1 - e)).toFixed(2) + 'px');
     // le contenu reste fixe à l'écran, la carte le dévoile comme une fenêtre
     ctInner.style.left = (-x) + 'px';
     ctInner.style.top = (-y) + 'px';
+
+    // Le titre part du coin bas-gauche de la petite carte et rejoint sa place
+    if (ctTitre) {
+      if (!fin) mesurerTitre();
+      var pad = Math.max(16, Math.min(24, W * 0.016));
+      var s0 = Math.min(1, (w0 * 0.62) / fin.w);
+      var s = s0 + (1 - s0) * e;
+      // ancré à la carte : il reste toujours dans sa fenêtre
+      var px = x + pad + (fin.x - pad) * e;
+      var py = y + (h - pad - fin.h * s) * (1 - e) + fin.y * e;
+      ctTitre.style.transform = 'translate(' + (px - fin.x).toFixed(2) + 'px,' + (py - fin.y).toFixed(2) + 'px) scale(' + s.toFixed(4) + ')';
+    }
+
     ctWrap.style.setProperty('--ct-p', e.toFixed(4));
+    ctWrap.style.setProperty('--ct-fade', clamp01((e - 0.62) / 0.3).toFixed(4));
     setOuvert(e > 0.97);
   }
 
   if (ctPreview) {
     ctPreview.addEventListener('click', function () {
-      var fin = ctWrap.getBoundingClientRect().top + window.scrollY + ctWrap.offsetHeight - window.innerHeight;
-      if (window.__lenis && typeof window.__lenis.scrollTo === 'function') window.__lenis.scrollTo(fin, { duration: 1.6 });
-      else window.scrollTo({ top: fin, behavior: REDUCED ? 'auto' : 'smooth' });
+      var cible = ctWrap.getBoundingClientRect().top + window.scrollY + ctWrap.offsetHeight - window.innerHeight;
+      if (window.__lenis && typeof window.__lenis.scrollTo === 'function') window.__lenis.scrollTo(cible, { duration: 1.6 });
+      else window.scrollTo({ top: cible, behavior: REDUCED ? 'auto' : 'smooth' });
     });
   }
 
   var raf = null;
   function maj() { raf = null; majFond(); majContact(); }
   function onScroll() { if (!raf) raf = requestAnimationFrame(maj); }
+  function onResize() { fin = null; onScroll(); }
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-  if (MQ_DESKTOP.addEventListener) MQ_DESKTOP.addEventListener('change', onScroll);
+  window.addEventListener('resize', onResize);
+  if (MQ_DESKTOP.addEventListener) MQ_DESKTOP.addEventListener('change', onResize);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
   maj();
 
   /* ---------- Formulaire ---------- */
