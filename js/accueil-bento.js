@@ -41,6 +41,29 @@
     abWrap.classList.toggle('is-clair', clair);
   }
 
+  /* ---------- À propos : la roue de mots ---------- */
+  // « Nathan Colin, » reste en place, la fin de la phrase change au scroll.
+  // Chaque mot reste affiché un moment, puis la roue tourne d'un cran.
+  var roueZone = document.querySelector('.ab-roue-zone');
+  var roue = document.querySelector('.ab-roue');
+  var points = document.querySelectorAll('.ab-points i');
+  function majRoue() {
+    if (!roueZone || !roue) return;
+    var mots = roue.children, n = mots.length;
+    if (!n) return;
+    var r = roueZone.getBoundingClientRect();
+    var zone = roueZone.offsetHeight - window.innerHeight;
+    var p = zone > 0 ? clamp01(-r.top / zone) : 0;
+    var pos = clamp01((p - 0.04) / 0.9) * (n - 1);
+    var base = Math.floor(pos), fr = pos - base;
+    var y = Math.min(n - 1, base + (REDUCED ? (fr > 0.5 ? 1 : 0) : ease(clamp01((fr - 0.5) / 0.5))));
+    var h = mots[0].offsetHeight;
+    roue.style.transform = 'translateY(' + (-y * h).toFixed(2) + 'px)';
+    var actif = Math.round(y);
+    for (var k = 0; k < points.length; k++) points[k].classList.toggle('on', k === actif);
+    for (var m = 0; m < n; m++) mots[m].setAttribute('aria-hidden', m === actif ? 'false' : 'true');
+  }
+
   /* ---------- Contact : la carte grandit ---------- */
   var ouvert = null;
   function setOuvert(on) {
@@ -125,7 +148,7 @@
   }
 
   var raf = null;
-  function maj() { raf = null; majFond(); majContact(); }
+  function maj() { raf = null; majFond(); majRoue(); majContact(); }
   function onScroll() { if (!raf) raf = requestAnimationFrame(maj); }
   function onResize() { fin = null; onScroll(); }
   window.addEventListener('scroll', onScroll, { passive: true });

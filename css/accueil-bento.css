@@ -1,29 +1,78 @@
 /* ==============================================================
-   Accueil — fin de page (noir et blanc uniquement)
-   1. Bento « à propos » : le fond passe du noir au blanc
-      pendant qu'on le parcourt (le contenu s'inverse tout seul)
+   Accueil — après « Selected work » (noir et blanc uniquement)
+   0. Vitrine → showreel : la vitrine se referme en fenêtre et le
+      showreel prend le relais dedans (voir accueil-vitrine.js)
+   1. À propos : passage noir → blanc en fondu, puis « Nathan Colin, »
+      avec la fin de la phrase qui tourne comme une roue au scroll
    2. Contact : une carte part du coin bas-droit et grandit
       avec le scroll jusqu'à remplir l'écran
    ============================================================== */
 
-/* ---------- 0. Showreel juste sous la vitrine ---------- */
+/* ---------- 0. Vitrine → showreel ---------- */
 
-/* Le bloc sous la vitrine glisse vers le haut avec un décalage (parallaxe,
-   jusqu'à 50vh) : on lui laisse de la place pour que « Selected work »
-   ne recouvre pas le titre du showreel. */
-.contenu-principal:not(.contenu-principal--bas) {
-  padding-bottom: 30vh
+/* Plus long qu'avant : fermeture, relais du showreel, puis un temps
+   pour le regarder avant que la page reprenne */
+.hero-scene {
+  height: 280vh
 }
 
-/* ---------- 1. Passage noir -> blanc, puis bento à propos ---------- */
+.hero-showreel {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  background: var(--noir)
+}
+
+.hero-showreel video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block
+}
+
+.hero-video-wrap.is-showreel {
+  cursor: pointer
+}
+
+/* Plus de bloc blanc qui remonte par-dessus la vitrine */
+.contenu-principal:not(.contenu-principal--bas) {
+  margin-top: 0 !important;
+  transform: none !important
+}
+
+/* Le titre « Showreel » arrive juste sous la fenêtre */
+.section-featured--titre {
+  position: relative;
+  z-index: 2;
+  padding: clamp(1rem, 2vh, 1.5rem) var(--marge) clamp(5rem, 12vh, 9rem)
+}
+
+.section-featured--titre .featured-cta {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono-xs);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: rgba(10, 10, 10, .45);
+  transition: color .3s ease
+}
+
+.section-featured--titre .featured-cta:hover,
+.section-featured--titre .featured-cta:focus-visible {
+  color: var(--noir)
+}
+
+/* ---------- 1. À propos ---------- */
 
 /* Comme sur grapheine.com : arrivé à un certain point du scroll,
    le fond et le texte basculent ensemble en fondu (≈ 1 s),
-   et reviennent si on remonte. Le bento arrive juste après. */
+   et reviennent si on remonte. */
 .ab-wrap {
-  --ab-gap: clamp(.5rem, .8vw, .9rem);
-  --ab-radius: clamp(1rem, 1.6vw, 1.75rem);
-  --ab-pad: clamp(1.3rem, 2.2vw, 2.5rem);
   position: relative;
   z-index: 1;
   --ab-fg: var(--blanc);
@@ -38,44 +87,32 @@
   color: var(--noir)
 }
 
-/* L'espace où se fait le passage, avant que le bento arrive */
+/* L'espace où se fait le passage, avant que le texte arrive */
 .ab-respiration {
-  height: 70vh
+  height: 60vh
 }
 
-.ab-contenu {
-  padding: clamp(6rem, 13vh, 8rem) var(--marge-nav) var(--marge-nav)
-}
-
-.bento {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-template-rows: 1fr 1fr auto;
-  gap: var(--ab-gap);
-  height: calc(100vh - clamp(6rem, 13vh, 8rem) - var(--marge-nav));
-  height: calc(100svh - clamp(6rem, 13vh, 8rem) - var(--marge-nav));
-  min-height: 600px;
-  max-width: 1680px;
-  margin: 0 auto
-}
-
-.bt {
+/* La phrase reste à l'écran pendant que la roue tourne */
+.ab-roue-zone {
   position: relative;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  border: 1px solid currentColor;
-  border-radius: var(--ab-radius);
-  padding: var(--ab-pad);
-  transition: border-color 1s cubic-bezier(.4, 0, .2, 1)
+  height: 340vh
 }
 
-.bt-intro  { grid-column: 1 / span 8; grid-row: 1 / span 2 }
-.bt-status { grid-column: 9 / span 4; grid-row: 1 }
-.bt-stats  { grid-column: 9 / span 4; grid-row: 2 }
-.bt-skills { grid-column: 1 / -1;     grid-row: 3 }
+.ab-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(6rem, 13vh, 8rem) var(--marge) clamp(3rem, 8vh, 5rem)
+}
 
-.bt-label {
+.ab-label {
+  position: absolute;
+  top: clamp(6rem, 13vh, 8rem);
+  left: var(--marge);
   font-family: var(--font-mono);
   font-size: var(--fs-mono-xs);
   letter-spacing: .04em;
@@ -83,180 +120,71 @@
   opacity: .6
 }
 
-/* Intro */
-.bt-intro {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.5rem
-}
-
-.bt-titre {
+.ab-bloc {
+  --ab-ligne: 1.05em;
   font-family: var(--font-titre);
   font-weight: 400;
   text-transform: uppercase;
-  font-size: clamp(2.8rem, min(6.4vw, 11vh), 8rem);
-  line-height: .92;
+  font-size: clamp(3rem, 7vw, 9.5rem);
+  line-height: 1;
   letter-spacing: .005em;
-  margin-top: 1rem
+  margin: 0
 }
 
-.bt-intro-txt {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(1rem, 2vw, 2.5rem);
-  font-size: clamp(.88rem, .95vw, 1.02rem);
-  line-height: 1.6;
-  opacity: .85
+.ab-fixe {
+  display: block
 }
 
-/* Statut */
-.bt-status {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.25rem
-}
-
-.bt-dot {
+.ab-fente {
+  display: block;
   position: relative;
-  width: .65rem;
-  height: .65rem;
-  border-radius: 50%;
-  background: currentColor
+  height: var(--ab-ligne);
+  overflow: hidden
 }
 
-.bt-dot::after {
-  content: '';
+.ab-roue {
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: currentColor;
-  animation: bt-pulse 2.2s ease-out infinite
+  left: 0;
+  top: 0;
+  right: 0;
+  will-change: transform
 }
 
-@keyframes bt-pulse {
-  from { transform: scale(1); opacity: .5 }
-  to   { transform: scale(3); opacity: 0 }
-}
-
-.bt-status-main {
-  font-size: clamp(1rem, 1.3vw, 1.35rem);
-  line-height: 1.3;
-  font-weight: 700
-}
-
-.bt-status-sub {
-  margin-top: .45rem;
-  font-size: .88rem;
-  opacity: .6
-}
-
-/* Chiffres */
-.bt-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  padding: 0
-}
-
-.bt-stat {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: .5rem;
-  padding: clamp(.9rem, 1.5vw, 1.5rem)
-}
-
-.bt-stat:nth-child(odd) {
-  border-right: 1px solid currentColor
-}
-
-.bt-stat:nth-child(-n+2) {
-  border-bottom: 1px solid currentColor
-}
-
-.bt-stat-num {
-  font-family: var(--font-titre);
-  font-size: clamp(1.8rem, min(3vw, 5.5vh), 3.4rem);
-  line-height: 1
-}
-
-.bt-stat-label {
-  font-size: .76rem;
-  opacity: .6
-}
-
-/* Compétences */
-.bt-skills {
+.ab-mot {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding-top: clamp(.8rem, 1.6vh, 1.2rem);
-  padding-bottom: clamp(.8rem, 1.6vh, 1.2rem)
-}
-
-.bt-skills .bt-label {
-  flex-shrink: 0
-}
-
-.bk-rows {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .2rem
-}
-
-.bk-row {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)
-}
-
-.bk-track {
-  display: flex;
-  width: max-content;
-  align-items: center;
-  animation: bk-defile 38s linear infinite
-}
-
-.bk-row--rev .bk-track {
-  animation-direction: reverse;
-  animation-duration: 44s
-}
-
-@keyframes bk-defile {
-  from { transform: translateX(0) }
-  to   { transform: translateX(-50%) }
-}
-
-.bk-item {
-  font-family: var(--font-titre);
-  text-transform: uppercase;
-  font-size: clamp(1.4rem, min(2.4vw, 4.2vh), 3rem);
-  line-height: 1.1;
+  height: var(--ab-ligne);
   white-space: nowrap
 }
 
-.bk-item--tool {
+.ab-mot--ital {
+  font-style: italic
+}
+
+.ab-mot--contour {
   color: transparent;
-  -webkit-text-stroke: 1px var(--ab-fg)
+  -webkit-text-stroke: 1.5px var(--ab-fg)
 }
 
-.bk-sep {
-  margin: 0 clamp(.7rem, 1.2vw, 1.2rem);
-  font-size: .7rem;
-  opacity: .5
-}
-
-.bento-sr {
+.ab-points {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap
+  left: 50%;
+  bottom: clamp(2rem, 6vh, 4rem);
+  transform: translateX(-50%);
+  display: flex;
+  gap: .6rem
+}
+
+.ab-points i {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  transition: background-color .3s ease
+}
+
+.ab-points i.on {
+  background: currentColor
 }
 
 /* ---------- 2. Contact : la carte qui grandit ---------- */
@@ -540,28 +468,36 @@
 /* ---------- Mobile / tablette : pas d'effets épinglés ---------- */
 
 @media (max-width: 900px) {
+  .hero-scene {
+    height: 230vh
+  }
+
   .ab-respiration {
-    height: 45vh
+    height: 40vh
   }
 
-  .ab-contenu {
-    padding: clamp(3rem, 10vw, 5rem) var(--marge-nav) clamp(3rem, 10vw, 5rem)
+  .ab-roue-zone {
+    height: 280vh
   }
 
-  .bento {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: none;
-    height: auto;
-    min-height: 0
+  .ab-stage {
+    padding-left: var(--marge-nav);
+    padding-right: var(--marge-nav)
   }
 
-  .bt-intro  { grid-column: 1 / -1; grid-row: auto }
-  .bt-status { grid-column: 1 / -1; grid-row: auto }
-  .bt-stats  { grid-column: 1 / -1; grid-row: auto }
-  .bt-skills { grid-column: 1 / -1; grid-row: auto; flex-direction: column; align-items: stretch }
+  .ab-label {
+    left: var(--marge-nav)
+  }
 
-  .bt-intro-txt {
-    grid-template-columns: 1fr
+  /* Sur téléphone, chaque mot peut tenir sur deux lignes */
+  .ab-bloc {
+    --ab-ligne: 2.1em;
+    font-size: clamp(2.6rem, 13vw, 5rem)
+  }
+
+  .ab-mot {
+    white-space: normal;
+    align-items: flex-start
   }
 
   .ct-wrap {
@@ -611,8 +547,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bk-track,
-  .bt-dot::after {
-    animation: none
+  .ab-wrap {
+    transition: none
   }
 }
