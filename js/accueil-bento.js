@@ -42,26 +42,80 @@
   }
 
   /* ---------- À propos : la roue de mots ---------- */
-  // « Nathan Colin, » reste en place, la fin de la phrase change au scroll.
-  // Chaque mot reste affiché un moment, puis la roue tourne d'un cran.
-  var roueZone = document.querySelector('.ab-roue-zone');
+  // « Nathan Colin, » reste en place, la fin de la phrase change toute
+  // seule toutes les 2,2 s quand la section est à l'écran. Rien ne bloque
+  // le scroll. La roue tourne toujours dans le même sens (boucle infinie).
   var roue = document.querySelector('.ab-roue');
-  var points = document.querySelectorAll('.ab-points i');
-  function majRoue() {
-    if (!roueZone || !roue) return;
-    var mots = roue.children, n = mots.length;
-    if (!n) return;
-    var r = roueZone.getBoundingClientRect();
-    var zone = roueZone.offsetHeight - window.innerHeight;
-    var p = zone > 0 ? clamp01(-r.top / zone) : 0;
-    var pos = clamp01((p - 0.04) / 0.9) * (n - 1);
-    var base = Math.floor(pos), fr = pos - base;
-    var y = Math.min(n - 1, base + (REDUCED ? (fr > 0.5 ? 1 : 0) : ease(clamp01((fr - 0.5) / 0.5))));
-    var h = mots[0].offsetHeight;
-    roue.style.transform = 'translateY(' + (-y * h).toFixed(2) + 'px)';
-    var actif = Math.round(y);
-    for (var k = 0; k < points.length; k++) points[k].classList.toggle('on', k === actif);
-    for (var m = 0; m < n; m++) mots[m].setAttribute('aria-hidden', m === actif ? 'false' : 'true');
+  var bloc = document.querySelector('.ab-bloc');
+  function majRoue() {}
+  if (roue && bloc) {
+    var originaux = Array.prototype.slice.call(roue.children);
+    var n = originaux.length;
+    var copie = originaux[0].cloneNode(true);       // pour boucler sans retour en arrière
+    copie.setAttribute('aria-hidden', 'true');
+    copie.removeAttribute('data-i18n');
+    roue.appendChild(copie);
+    var idx = 0, minuteur = null, visible = false;
+
+    function hauteur() { return originaux[0].offsetHeight; }
+    function placer(i, anime) {
+      roue.classList.toggle('sans-transition', !anime);
+      roue.style.transform = 'translateY(' + (-i * hauteur()) + 'px)';
+      for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i % n ? 'false' : 'true');
+    }
+    function suivant() {
+      idx++;
+      placer(idx, true);
+      if (idx === n) {
+        setTimeout(function () {
+          idx = 0;
+          placer(0, false);
+          copie.textContent = originaux[0].textContent;
+        }, 950);
+      }
+    }
+    function lancer() {
+      if (minuteur || REDUCED) return;
+      minuteur = setInterval(suivant, 2200);
+    }
+    function arreter() { clearInterval(minuteur); minuteur = null; }
+
+    // Texte le plus grand possible sans dépasser (le mot le plus long décide)
+    function ajuster() {
+      bloc.style.removeProperty('--ab-taille');
+      if (!MQ_DESKTOP.matches) { placer(idx, false); return; }
+      var dispo = bloc.clientWidth, max = 0;
+      originaux.concat([bloc.querySelector('.ab-fixe')]).forEach(function (el) {
+        var mesure = document.createElement('span');
+        mesure.className = el.className;
+        mesure.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;display:inline-block;height:auto';
+        mesure.textContent = el.textContent;
+        bloc.appendChild(mesure);
+        var w = mesure.getBoundingClientRect().width;
+        mesure.remove();
+        if (w > max) max = w;
+      });
+      if (max > dispo) {
+        var taille = parseFloat(getComputedStyle(bloc).fontSize) * dispo / max * 0.98;
+        bloc.style.setProperty('--ab-taille', taille + 'px');
+      }
+      placer(idx, false);
+    }
+
+    var io = new IntersectionObserver(function (es) {
+      visible = es[0].isIntersecting;
+      if (visible) lancer(); else arreter();
+    }, { threshold: 0.35 });
+    io.observe(bloc);
+    window.addEventListener('resize', ajuster);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajuster);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', ajuster);
+    window.addEventListener('load', ajuster);
+    // Le bouton FR/EN change les mots : on réajuste
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.btn-langue')) setTimeout(function () { copie.textContent = originaux[0].textContent; ajuster(); }, 50);
+    });
+    ajuster();
   }
 
   /* ---------- Contact : la carte grandit ---------- */

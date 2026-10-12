@@ -18,6 +18,8 @@ window.__vitrineD = true;
   function c01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function seg(p, a, b) { return c01((p - a) / (b - a)); }
   function ease(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+  // Courbe « expo » : départ et arrivée très doux, milieu rapide (mouvements de studio)
+  function expo(x) { return x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2; }
 
   function init() {
     var scene = document.querySelector('.hero-scene');
@@ -76,8 +78,13 @@ window.__vitrineD = true;
       var p = c01(-r.top / zone);
       if (REDUIT) p = p > 0.5 ? 1 : 0;
 
-      // 1. Fermeture (0 → 0,55)
-      var f = ease(seg(p, 0, 0.55));
+      // 1. Fermeture (0 → 0,45)
+      var f = ease(seg(p, 0, 0.45));
+
+      // 2. Recul : la fenêtre recule un peu (0,47 → 0,58) puis revient (0,76 → 0,88)
+      var recul = expo(seg(p, 0.47, 0.58)) * (1 - expo(seg(p, 0.76, 0.88)));
+      var echelle = 1 - 0.12 * recul;
+      wrap.style.transform = echelle < 0.9999 ? 'scale(' + echelle.toFixed(4) + ')' : '';
       hero.style.setProperty('--hero-p', f.toFixed(4));
       clones.forEach(function (c) { c.el.style.setProperty('--hero-p', f.toFixed(4)); });
 
@@ -91,7 +98,7 @@ window.__vitrineD = true;
 
       if (f > 0.001) {
         hero.style.clipPath = 'inset(' + (T * f).toFixed(1) + 'px ' + (R * f).toFixed(1) + 'px ' +
-          (B * f).toFixed(1) + 'px ' + (L * f).toFixed(1) + 'px round ' + (rayon * f).toFixed(1) + 'px)';
+          (B * f).toFixed(1) + 'px ' + (L * f).toFixed(1) + 'px round ' + (rayon * f * echelle).toFixed(1) + 'px)';
       } else {
         hero.style.clipPath = '';
       }
@@ -113,9 +120,15 @@ window.__vitrineD = true;
         });
       }
 
-      // 2. Le showreel prend le relais (0,57 → 0,78)
-      var x = ease(seg(p, 0.57, 0.78));
-      if (srBloc) srBloc.style.opacity = x.toFixed(4);
+      // 3. Masque : le showreel monte de bas en haut dans la fenêtre (0,56 → 0,78).
+      //    Les images glissent un peu moins vite que le masque (parallaxe).
+      var x = expo(seg(p, 0.56, 0.78));
+      if (srBloc) {
+        srBloc.style.opacity = x > 0 ? 1 : 0;
+        srBloc.style.clipPath = 'inset(' + ((1 - x) * 100).toFixed(2) + '% 0 0 0)';
+      }
+      if (srVid) srVid.style.transform = 'translateY(' + ((1 - x) * 14).toFixed(2) + '%)';
+      if (heroVid) heroVid.style.transform = x > 0 ? 'translateY(' + (-x * 14).toFixed(2) + '%) scale(1.1)' : '';
       lireShowreel(x > 0.01 && r.bottom > 0);
       if (heroVid) {
         if (x >= 1 && !heroVid.paused) { try { heroVid.pause(); } catch (_) {} }
