@@ -16,33 +16,79 @@
   height: 280vh
 }
 
+/* Ancien bloc du showreel dans la fenêtre : la vidéo passe dans .hero-m1 */
 .hero-showreel {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  opacity: 0;
-  background: var(--noir)
+  display: none
 }
 
-.hero-showreel video {
+/* M1 — masque typographique : showreel + écran blanc percé par le mot */
+.hero-m1 {
   position: absolute;
   left: 0;
-  top: -8%;
+  top: 0;
   width: 100%;
-  height: 116%;
+  height: 100%;
+  z-index: 4;
+  overflow: hidden;
+  isolation: isolate;
+  visibility: hidden;
+  background: var(--noir);
+  will-change: clip-path, left, top, width, height
+}
+
+.hero-m1 video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  display: block;
+  display: block
+}
+
+.hero-m1-masque {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  mix-blend-mode: screen;
+  display: grid;
+  place-items: center;
+  pointer-events: none
+}
+
+.hero-m1-mot {
+  display: flex;
+  overflow: hidden;
+  font-family: var(--font-titre);
+  font-weight: 400;
+  line-height: 1;
+  padding-bottom: .04em;
+  color: #000;
+  white-space: nowrap;
   will-change: transform
 }
 
-/* La fenêtre peut reculer pendant le passage au showreel */
-.hero-video-wrap {
-  transform-origin: 50% 50%;
+.hero-m1-mot span {
+  display: inline-block;
+  transform: translateY(110%);
   will-change: transform
 }
 
-.hero-video-wrap.is-showreel {
+.hero-m1.is-showreel {
   cursor: pointer
+}
+
+/* Une fois l'écran blanc monté, la vitrine disparaît derrière */
+.hero.is-m1 {
+  background: transparent;
+  pointer-events: none
+}
+
+.hero.is-m1 .hero-m1 {
+  pointer-events: auto
+}
+
+.hero.is-m1 .hero-video-wrap {
+  visibility: hidden
 }
 
 /* Plus de bloc blanc qui remonte par-dessus la vitrine */

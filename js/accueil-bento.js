@@ -42,48 +42,38 @@
   }
 
   /* ---------- À propos : la roue de mots ---------- */
-  // « Nathan Colin, » reste en place, la fin de la phrase change toute
-  // seule toutes les 2,2 s quand la section est à l'écran. Rien ne bloque
-  // le scroll. La roue tourne toujours dans le même sens (boucle infinie).
+  // « Nathan Colin, » reste en place, la fin de la phrase change au fil du
+  // scroll : le mot affiché dépend de la position du titre dans l'écran.
+  // Rien ne bloque la page ; en remontant, les mots reviennent dans l'ordre.
   var roue = document.querySelector('.ab-roue');
   var bloc = document.querySelector('.ab-bloc');
-  function majRoue() {}
+  var majRoue = function () {};
   if (roue && bloc) {
     var originaux = Array.prototype.slice.call(roue.children);
     var n = originaux.length;
-    var copie = originaux[0].cloneNode(true);       // pour boucler sans retour en arrière
-    copie.setAttribute('aria-hidden', 'true');
-    copie.removeAttribute('data-i18n');
-    roue.appendChild(copie);
-    var idx = 0, minuteur = null, visible = false;
+    var idx = -1;
 
-    function hauteur() { return originaux[0].offsetHeight; }
+    function hauteur() { return originaux[0].offsetHeight || parseFloat(getComputedStyle(originaux[0]).lineHeight) || 0; }
     function placer(i, anime) {
-      roue.classList.toggle('sans-transition', !anime);
+      roue.classList.toggle('sans-transition', !anime || REDUCED);
       roue.style.transform = 'translateY(' + (-i * hauteur()) + 'px)';
-      for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i % n ? 'false' : 'true');
+      for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i ? 'false' : 'true');
     }
-    function suivant() {
-      idx++;
-      placer(idx, true);
-      if (idx === n) {
-        setTimeout(function () {
-          idx = 0;
-          placer(0, false);
-          copie.textContent = originaux[0].textContent;
-        }, 950);
-      }
-    }
-    function lancer() {
-      if (minuteur || REDUCED) return;
-      minuteur = setInterval(suivant, 2200);
-    }
-    function arreter() { clearInterval(minuteur); minuteur = null; }
+    // Le titre entre par le bas (85 % de l'écran) → 1er mot,
+    // il monte jusqu'à 20 % du haut → dernier mot
+    majRoue = function () {
+      var r = bloc.getBoundingClientRect();
+      var vh = window.innerHeight || 1;
+      var c = (r.top + r.height / 2) / vh;
+      var p = clamp01((0.8 - c) / 0.55);
+      var i = Math.min(n - 1, Math.floor(p * n));
+      if (i !== idx) { var premier = idx < 0; idx = i; placer(i, !premier); }
+    };
 
     // Texte le plus grand possible sans dépasser (le mot le plus long décide)
     function ajuster() {
       bloc.style.removeProperty('--ab-taille');
-      if (!MQ_DESKTOP.matches) { placer(idx, false); return; }
+      if (!MQ_DESKTOP.matches) { placer(Math.max(idx, 0), false); return; }
       var dispo = bloc.clientWidth, max = 0;
       originaux.concat([bloc.querySelector('.ab-fixe')]).forEach(function (el) {
         var mesure = document.createElement('span');
@@ -99,23 +89,19 @@
         var taille = parseFloat(getComputedStyle(bloc).fontSize) * dispo / max * 0.98;
         bloc.style.setProperty('--ab-taille', taille + 'px');
       }
-      placer(idx, false);
+      placer(Math.max(idx, 0), false);
     }
 
-    var io = new IntersectionObserver(function (es) {
-      visible = es[0].isIntersecting;
-      if (visible) lancer(); else arreter();
-    }, { threshold: 0.35 });
-    io.observe(bloc);
     window.addEventListener('resize', ajuster);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajuster);
     if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', ajuster);
     window.addEventListener('load', ajuster);
     // Le bouton FR/EN change les mots : on réajuste
     document.addEventListener('click', function (e) {
-      if (e.target.closest('.btn-langue')) setTimeout(function () { copie.textContent = originaux[0].textContent; ajuster(); }, 50);
+      if (e.target.closest('.btn-langue')) setTimeout(ajuster, 50);
     });
     ajuster();
+    majRoue();
   }
 
   /* ---------- Contact : la carte grandit ---------- */
