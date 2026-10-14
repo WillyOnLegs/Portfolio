@@ -192,32 +192,35 @@
     shell.innerHTML = '';
 
     // Composition centrée :
-    // 1. grand titre (vers 25 % de la hauteur de l'écran)
-    // 2. vidéo principale, toute la largeur de la grille
+    // 1. grand titre au centre de l'écran
+    // 2. vidéo principale (largeur de la grille), révélée par une fenêtre
     // 3. infos + description (le texte se remplit au scroll)
     // 4. le reste de la grille
     // 5. projet suivant (la carte reste à droite et grandit)
     var layout = el('div', 'pp-layout');
     shell.appendChild(layout);
 
-    /* ----- 1. Titre ----- */
-    var intro = el('header', 'pp-intro');
+    /* ----- 1 et 2. Titre + vidéo principale ----- */
+    // Écran collant : le titre géant au centre, la vidéo déjà à sa place
+    // (largeur de la grille) mais masquée. Au scroll, une petite fenêtre
+    // au milieu du titre s'ouvre jusqu'aux bords de la vidéo (initIntro).
+    var intro = el('section', 'pp-intro');
+    var stageIntro = el('div', 'pp-intro-stage');
     var h1 = el('h1', 'pp-titre');
     h1.textContent = projet.nom;
-    intro.appendChild(h1);
-    layout.appendChild(intro);
-
-    /* ----- 2 à 4. Grille centrée ----- */
-    var content = el('div', 'pp-content');
-    layout.appendChild(content);
-
-    // Vidéo principale : le premier bloc du projet
+    stageIntro.appendChild(h1);
     var heroBloc = null;
     if (sections.length && sections[0].blocs && sections[0].blocs.length) {
       heroBloc = buildBloc(sections[0].blocs[0], resolve);
       heroBloc.classList.add('pp-bloc--hero');
-      content.appendChild(heroBloc);
+      stageIntro.appendChild(heroBloc);
     }
+    intro.appendChild(stageIntro);
+    layout.appendChild(intro);
+
+    /* ----- 3 et 4. Infos, description, grille centrée ----- */
+    var content = el('div', 'pp-content');
+    layout.appendChild(content);
 
     // Infos + description
     var info = el('div', 'pp-info');
@@ -335,7 +338,7 @@
 
     // Le hero reprend la vidéo là où en était le clone (transition SPA)
     if (opts.videoStartTime > 0) {
-      var hv = content.querySelector('.pp-bloc--hero video');
+      var hv = shell.querySelector('.pp-bloc--hero video');
       if (hv) {
         hv.addEventListener('loadedmetadata', function () {
           try { hv.currentTime = opts.videoStartTime; } catch (_) {}
@@ -352,15 +355,26 @@
   function measureHeroRect() {
     var probe = el('main', 'proj-page-shell pp pp--probe', { 'aria-hidden': 'true' });
     probe.innerHTML =
-      '<div class="pp-layout"><header class="pp-intro"><h1 class="pp-titre">x</h1></header>' +
-      '<div class="pp-content"><div class="pp-bloc pp-bloc--full pp-bloc--hero"><figure class="pp-cell"></figure></div>' +
-      '</div></div>';
+      '<div class="pp-layout"><section class="pp-intro"><div class="pp-intro-stage"><h1 class="pp-titre">x</h1>' +
+      '<div class="pp-bloc pp-bloc--full pp-bloc--hero"><figure class="pp-cell"></figure></div>' +
+      '</div></section></div>';
     document.body.appendChild(probe);
     var fig = probe.querySelector('.pp-cell');
     var r = fig.getBoundingClientRect();
     var radius = parseFloat(getComputedStyle(fig).borderTopLeftRadius) || 0;
     document.body.removeChild(probe);
+    // Sur ordinateur, la vidéo arrive masquée : le zoom vise la petite fenêtre
+    if (MQ_DESKTOP.matches && !REDUCED) {
+      var f = fenetreDepart(r.width);
+      return { top: r.top + (r.height - f.h) / 2, left: r.left + (r.width - f.w) / 2, width: f.w, height: f.h, radius: radius * 0.6 };
+    }
     return { top: r.top, left: r.left, width: r.width, height: r.height, radius: radius };
+  }
+
+  // Petite fenêtre de départ (16:9), au milieu du titre
+  function fenetreDepart(largeurVideo) {
+    var w = Math.min(largeurVideo, window.innerWidth * 0.2);
+    return { w: w, h: w * 9 / 16 };
   }
 
   /* ---------- Défilement (fenêtre ou shell injecté) ---------- */
@@ -538,6 +552,75 @@
       io.observe(c);
     });
     cleanups.push(function () { io.disconnect(); });
+  }
+
+  /* ---------- Haut de page : la fenêtre s'ouvre ---------- */
+  // La vidéo est à sa place finale mais masquée : on n'en voit qu'une petite
+  // fenêtre au milieu du titre. En scrollant, la fenêtre s'ouvre jusqu'aux
+  // bords de la vidéo ; l'image se découvre sans grossir (léger recul
+  // à l'intérieur) et le titre recule derrière. Ordinateur seulement.
+
+  function studio(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2; }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function initIntro(root, scroller, cleanups, opts) {
+    var intro = root.querySelector('.pp-intro');
+    var stage = root.querySelector('.pp-intro-stage');
+    var titre = root.querySelector('.pp-titre');
+    var bloc = root.querySelector('.pp-intro .pp-bloc--hero');
+    var cell = bloc ? bloc.querySelector('.pp-cell') : null;
+    if (!intro || !stage || !cell) return;
+
+    // La petite fenêtre apparaît juste après le titre (tout de suite si on
+    // arrive par la transition depuis l'accueil : le zoom y atterrit)
+    var apparait = opts && opts.spa ? 1 : 0;
+    var tween = null;
+    if (!apparait) {
+      var t0 = performance.now() + 750;
+      tween = requestAnimationFrame(function tick(now) {
+        apparait = studio(clamp01((now - t0) / 900));
+        maj();
+        if (apparait < 1) tween = requestAnimationFrame(tick);
+        else tween = null;
+      });
+    }
+
+    function effacer() {
+      cell.style.clipPath = '';
+      bloc.style.removeProperty('--pp-hero-zoom');
+      if (titre) { titre.style.removeProperty('--pp-t-s'); titre.style.removeProperty('--pp-t-o'); }
+    }
+
+    function maj() {
+      if (!MQ_DESKTOP.matches || REDUCED) { effacer(); return; }
+      var r = intro.getBoundingClientRect();
+      var course = intro.offsetHeight - stage.offsetHeight;
+      var o = studio(course > 0 ? clamp01(-r.top / (course * 0.9)) : 1);
+      var W = cell.offsetWidth, H = cell.offsetHeight;
+      var f = fenetreDepart(W);
+      var w = lerp(f.w * apparait, W, o), h = lerp(f.h * apparait, H, o);
+      var rayon = parseFloat(getComputedStyle(cell).borderTopLeftRadius) || 0;
+      var ix = ((W - w) / 2).toFixed(1), iy = ((H - h) / 2).toFixed(1);
+      cell.style.clipPath = 'inset(' + iy + 'px ' + ix + 'px ' + iy + 'px ' + ix + 'px round ' + lerp(rayon * 0.6, rayon, o).toFixed(1) + 'px)';
+      bloc.style.setProperty('--pp-hero-zoom', lerp(1.25, 1, o).toFixed(4));
+      if (titre) {
+        titre.style.setProperty('--pp-t-s', lerp(1, 0.9, o).toFixed(4));
+        titre.style.setProperty('--pp-t-o', lerp(1, 0.35, o).toFixed(3));
+      }
+    }
+
+    var raf = null;
+    function onScroll() { if (!raf) raf = requestAnimationFrame(function () { raf = null; maj(); }); }
+    scroller.target.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    if (MQ_DESKTOP.addEventListener) MQ_DESKTOP.addEventListener('change', onScroll);
+    maj();
+    cleanups.push(function () {
+      if (tween) cancelAnimationFrame(tween);
+      scroller.target.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (MQ_DESKTOP.removeEventListener) MQ_DESKTOP.removeEventListener('change', onScroll);
+    });
   }
 
   /* ---------- Description : le texte se remplit au scroll ---------- */
@@ -724,6 +807,7 @@
     splitTitle(root);
     initReveal(root, scroller, cleanups);
     initVideos(root, scroller, cleanups);
+    initIntro(root, scroller, cleanups, opts);
     initDescFill(root, scroller, cleanups);
     initOutro(root, scroller, cleanups);
     initProgressBar(root, scroller, cleanups);
