@@ -99,8 +99,11 @@
     var media;
     if (m.video) {
       fig.classList.add('pp-cell--video');
+      // chargée seulement à l'approche de l'écran (initVideos) ;
+      // l'image d'aperçu s'affiche en attendant
       media = el('video', 'pp-media', {
-        muted: true, loop: true, playsinline: true, preload: 'metadata',
+        muted: true, loop: true, playsinline: true, preload: 'none',
+        poster: src.replace(/\.mp4$/i, '.poster.webp'),
         disablepictureinpicture: true, disableremoteplayback: true,
         controlslist: 'nofullscreen nodownload noremoteplayback',
         'aria-label': m.alt || null
@@ -224,6 +227,11 @@
     if (sections.length && sections[0].blocs && sections[0].blocs.length) {
       heroBloc = buildBloc(sections[0].blocs[0], resolve);
       heroBloc.classList.add('pp-bloc--hero');
+      // la vidéo principale est visible tout de suite : elle se charge en priorité
+      var hvid = heroBloc.querySelector('video');
+      if (hvid) hvid.preload = 'auto';
+      var himg = heroBloc.querySelector('img');
+      if (himg) { himg.loading = 'eager'; himg.setAttribute('fetchpriority', 'high'); }
       stageIntro.appendChild(heroBloc);
     }
     intro.appendChild(stageIntro);
@@ -317,7 +325,7 @@
       var card = el('a', 'pp-outro-card', { href: next.href, 'data-curseur': true, 'aria-label': next.nom });
       var cover = rebase(next.cover);
       if (next.coverIsVideo) {
-        var v = el('video', 'pp-media', { muted: true, loop: true, playsinline: true, preload: 'metadata', 'aria-hidden': 'true' });
+        var v = el('video', 'pp-media', { muted: true, loop: true, playsinline: true, preload: 'none', poster: cover.replace(/\.mp4$/i, '.poster.webp'), 'aria-hidden': 'true' });
         v.muted = true;
         v.loop = true;
         v.playsInline = true;
@@ -471,6 +479,17 @@
       });
     }, { root: scroller.ioRoot, threshold: [0, 0.05, 0.25, 0.6] });
 
+    // préchargement : une vidéo commence à se charger ~1 écran avant d'apparaître
+    var pre = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var v = e.target.querySelector('video');
+        if (v && v.preload === 'none') v.preload = 'auto';
+        pre.unobserve(e.target);
+      });
+    }, { root: scroller.ioRoot, rootMargin: '100% 0px' });
+    cleanups.push(function () { pre.disconnect(); });
+
     function setSon(cell, on) {
       var v = cell.querySelector('video');
       var btn = cell.querySelector('.pp-cell-son');
@@ -483,6 +502,7 @@
 
     cells.forEach(function (cell) {
       io.observe(cell);
+      pre.observe(cell);
       if (!cell.classList.contains('pp-cell--video')) return;
       var v = cell.querySelector('video');
       var ctrl = cell.querySelector('.pp-cell-pause');

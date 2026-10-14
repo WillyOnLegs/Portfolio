@@ -240,7 +240,7 @@
 /* Chiffres */
 .pi-chiffres {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--pi-trait)
 }
 
@@ -548,22 +548,18 @@ a:focus-visible > .pi-roll .pi-l {
     padding-block: clamp(2.5rem, 10vw, 4rem)
   }
 
-  .pi-chiffres {
-    grid-template-columns: 1fr 1fr
-  }
-
   /* « Let's work together. » tient sur une ligne */
   .pi-appel-lien {
     font-size: 9.5vw
   }
 
-  .pi-chiffre:nth-child(3) {
-    padding-left: 0;
-    border-left: 0
+  /* les 3 chiffres restent sur une ligne */
+  .pi-chiffre + .pi-chiffre {
+    padding-left: clamp(.6rem, 3vw, 1rem)
   }
 
-  .pi-chiffre:nth-child(n+3) {
-    margin-top: 1.5rem
+  .pi-chiffre-num {
+    font-size: clamp(2rem, 9vw, 3rem)
   }
 }
 

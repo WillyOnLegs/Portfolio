@@ -7,7 +7,7 @@ function rewritePath(path){if(!path)return path;return path.replace(/^\.\.\//,''
 const mainTrack=document.createElement('div');mainTrack.className='selected-main-track';main.appendChild(mainTrack);projetsVitrine.forEach((p,i)=>{const num=String(i+1).padStart(2,'0');const navItem=document.createElement('a');navItem.className='selected-nav-item'+(i===0?' actif':'');navItem.href=p.href||'#';navItem.dataset.idx=i;navItem.setAttribute('data-curseur','');navItem.innerHTML=`
         <span class="selected-nav-titre">${p.nom}</span>
         <span class="selected-nav-num">${num}</span>
-      `;track.appendChild(navItem);const cover=rewritePath(p.cover);let mediaHtml;if(cover){if(p.video){mediaHtml=`<video autoplay muted loop playsinline preload="metadata"><source src="${cover}"></video>`;}else{mediaHtml=`<img src="${cover}" alt="${p.nom}" loading="lazy">`;}}else{mediaHtml=`<div style="width:100%;height:100%;background:rgba(255,255,255,0.05)"></div>`;}
+      `;track.appendChild(navItem);const cover=rewritePath(p.cover);let mediaHtml;if(cover){if(p.video){mediaHtml=`<video data-vue muted loop playsinline preload="none" poster="${cover.replace(/\.mp4$/i,'.poster.webp')}"><source src="${cover}" type="video/mp4"></video>`;}else{mediaHtml=`<img src="${cover}" alt="${p.nom}" loading="lazy">`;}}else{mediaHtml=`<div style="width:100%;height:100%;background:rgba(255,255,255,0.05)"></div>`;}
 const media=document.createElement('div');media.className='selected-media';media.dataset.idx=i;const viewLabel=(window.langueActuelle==='fr')?`Voir ${p.nom}`:`View ${p.nom}`;media.innerHTML=`
         <a href="${p.href}" data-curseur aria-label="${viewLabel}">
           ${mediaHtml}

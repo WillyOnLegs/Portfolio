@@ -23,8 +23,7 @@
   ajout('pi.services', 'Services', 'Ce que je fais');
   ajout('pi.outils', 'Tools', 'Outils');
   ajout('pi.parcours', 'Experience', 'Parcours');
-  ajout('pi.s1', 'Motion design 2D', 'Motion design 2D');
-  ajout('pi.s2', 'Motion design 3D', 'Motion design 3D');
+  ajout('pi.s1', 'Motion design 2D & 3D', 'Motion design 2D & 3D');
   ajout('pi.s3', 'Brand identity', 'Identité de marque');
   ajout('pi.s4', 'Art direction', 'Direction artistique');
   ajout('pi.p1', 'Internship · Branding & motion', 'Stage · Branding & motion');
