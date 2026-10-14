@@ -1,151 +1,25 @@
 /* ==============================================================
-   Accueil — après « Selected work » (noir et blanc uniquement)
-   0. Vitrine → showreel : la vitrine se referme en fenêtre et le
-      showreel prend le relais dedans (voir accueil-vitrine.js)
-   1. À propos : passage noir → blanc en fondu, puis « Nathan Colin, »
-      avec la fin de la phrase qui tourne comme une roue au scroll
-   2. Contact : une carte part du coin bas-droit et grandit
-      avec le scroll jusqu'à remplir l'écran
+   Accueil — à propos et contact (noir et blanc uniquement)
+   1. À propos (juste après la vitrine, sur le bloc blanc) :
+      « Nathan Colin, » avec la fin de la phrase qui change au scroll
+   2. Contact (après « Selected work », sur fond noir) : une carte
+      blanche part du coin bas-droit et grandit jusqu'à remplir l'écran
    ============================================================== */
-
-/* ---------- 0. Vitrine → showreel ---------- */
-
-/* Plus long qu'avant : fermeture, relais du showreel, puis un temps
-   pour le regarder avant que la page reprenne */
-.hero-scene {
-  height: 280vh
-}
-
-/* Ancien bloc du showreel dans la fenêtre : la vidéo passe dans .hero-m1 */
-.hero-showreel {
-  display: none
-}
-
-/* M1 — masque typographique : showreel + écran blanc percé par le mot */
-.hero-m1 {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 4;
-  overflow: hidden;
-  isolation: isolate;
-  visibility: hidden;
-  background: var(--noir);
-  will-change: clip-path, left, top, width, height
-}
-
-.hero-m1 video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block
-}
-
-.hero-m1-masque {
-  position: absolute;
-  inset: 0;
-  background: #fff;
-  mix-blend-mode: screen;
-  display: grid;
-  place-items: center;
-  pointer-events: none
-}
-
-.hero-m1-mot {
-  display: flex;
-  overflow: hidden;
-  font-family: var(--font-titre);
-  font-weight: 400;
-  line-height: 1;
-  padding-bottom: .04em;
-  color: #000;
-  white-space: nowrap;
-  will-change: transform
-}
-
-.hero-m1-mot span {
-  display: inline-block;
-  transform: translateY(110%);
-  will-change: transform
-}
-
-.hero-m1.is-showreel {
-  cursor: pointer
-}
-
-/* Une fois l'écran blanc monté, la vitrine disparaît derrière */
-.hero.is-m1 {
-  background: transparent;
-  pointer-events: none
-}
-
-.hero.is-m1 .hero-m1 {
-  pointer-events: auto
-}
-
-.hero.is-m1 .hero-video-wrap {
-  visibility: hidden
-}
-
-/* Plus de bloc blanc qui remonte par-dessus la vitrine */
-.contenu-principal:not(.contenu-principal--bas) {
-  margin-top: 0 !important;
-  transform: none !important
-}
-
-/* Le titre « Showreel » arrive juste sous la fenêtre */
-.section-featured--titre {
-  position: relative;
-  z-index: 2;
-  padding: clamp(1rem, 2vh, 1.5rem) var(--marge) clamp(5rem, 12vh, 9rem)
-}
-
-.section-featured--titre .featured-cta {
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font: inherit;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono-xs);
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: rgba(10, 10, 10, .45);
-  transition: color .3s ease
-}
-
-.section-featured--titre .featured-cta:hover,
-.section-featured--titre .featured-cta:focus-visible {
-  color: var(--noir)
-}
 
 /* ---------- 1. À propos ---------- */
 
-/* Comme sur grapheine.com : arrivé à un certain point du scroll,
-   le fond et le texte basculent ensemble en fondu (≈ 1 s),
-   et reviennent si on remonte. */
-.ab-wrap {
+/* Sur le bloc blanc qui recouvre la vitrine : noir sur blanc */
+.ab-wrap,
+.ab-wrap.is-clair {
   position: relative;
   z-index: 1;
-  --ab-fg: var(--blanc);
-  background: var(--noir);
-  color: var(--blanc);
-  transition: background-color 1s cubic-bezier(.4, 0, .2, 1), color 1s cubic-bezier(.4, 0, .2, 1)
-}
-
-.ab-wrap.is-clair {
   --ab-fg: var(--noir);
   background: var(--blanc);
   color: var(--noir)
 }
 
-/* L'espace où se fait le passage, avant que le texte arrive */
 .ab-respiration {
-  height: 60vh
+  display: none
 }
 
 /* Section de hauteur normale : rien ne bloque le scroll.
@@ -227,12 +101,12 @@
   -webkit-text-stroke: 1.5px var(--ab-fg)
 }
 
-/* ---------- 2. Contact : la carte qui grandit ---------- */
+/* ---------- 2. Contact : la carte blanche qui grandit sur le noir ---------- */
 
 .ct-wrap {
   position: relative;
   height: 220vh;
-  background: var(--blanc);
+  background: var(--noir);
   z-index: 2
 }
 
@@ -247,8 +121,8 @@
 .ct-card {
   position: absolute;
   overflow: hidden;
-  background: var(--noir);
-  color: var(--blanc);
+  background: var(--blanc);
+  color: var(--noir);
   border-radius: var(--ct-r, 1.25rem);
   will-change: left, top, width, height
 }
@@ -300,7 +174,7 @@
   display: inline-flex;
   align-items: baseline;
   gap: .6rem;
-  color: var(--blanc);
+  color: var(--noir);
   text-decoration: none;
   font-family: var(--font-titre);
   text-transform: uppercase;
@@ -324,11 +198,11 @@
   flex-wrap: wrap;
   gap: .5rem 1.75rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, .2)
+  border-top: 1px solid rgba(10, 10, 10, .2)
 }
 
 .ct-socials a {
-  color: var(--blanc);
+  color: var(--noir);
   text-decoration: none;
   font-size: 1rem;
   opacity: .8;
@@ -344,7 +218,7 @@
   flex-direction: column;
   min-width: 0;
   padding: clamp(1.4rem, 2.4vw, 2.5rem);
-  border: 1px solid rgba(255, 255, 255, .22);
+  border: 1px solid rgba(10, 10, 10, .22);
   border-radius: clamp(1rem, 1.6vw, 1.75rem)
 }
 
@@ -379,17 +253,17 @@
   font-size: .7rem;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, .5)
+  color: rgba(10, 10, 10, .5)
 }
 
 .bf-input {
   width: 100%;
   padding: .5rem 0;
   border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, .22);
+  border-bottom: 1px solid rgba(10, 10, 10, .22);
   border-radius: 0;
   background: transparent;
-  color: var(--blanc);
+  color: var(--noir);
   font: inherit;
   font-size: 1rem;
   outline: none;
@@ -397,7 +271,7 @@
 }
 
 .bf-input:focus {
-  border-bottom-color: var(--blanc)
+  border-bottom-color: var(--noir)
 }
 
 .bf-textarea {
@@ -410,7 +284,7 @@
 .bf-feedback {
   min-height: 1.2em;
   font-size: .82rem;
-  color: rgba(255, 255, 255, .75)
+  color: rgba(10, 10, 10, .75)
 }
 
 .bf-submit {
@@ -421,8 +295,8 @@
   padding: 1rem 1.4rem;
   border: 0;
   border-radius: 999px;
-  background: var(--blanc);
-  color: var(--noir);
+  background: var(--noir);
+  color: var(--blanc);
   font: inherit;
   font-size: .95rem;
   cursor: pointer;
@@ -456,7 +330,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--blanc);
+  color: var(--noir);
   cursor: pointer
 }
 
@@ -474,7 +348,7 @@
   width: 2.6rem;
   height: 2.6rem;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .35);
+  border: 1px solid rgba(10, 10, 10, .35);
   opacity: calc(1 - var(--ct-p, 0) * 4)
 }
 
@@ -508,14 +382,6 @@
 /* ---------- Mobile / tablette : pas d'effets épinglés ---------- */
 
 @media (max-width: 900px) {
-  .hero-scene {
-    height: 230vh
-  }
-
-  .ab-respiration {
-    height: 40vh
-  }
-
   .ab-stage {
     padding-left: var(--marge-nav);
     padding-right: var(--marge-nav)
@@ -579,11 +445,5 @@
 
   .bf-field--message {
     flex: none
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ab-wrap {
-    transition: none
   }
 }
