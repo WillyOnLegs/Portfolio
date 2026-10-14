@@ -54,8 +54,8 @@
   if (roue && bloc && zoneRoue) {
     var originaux = Array.prototype.slice.call(roue.children);
     var n = originaux.length;
-    var LARGEUR = 0.9;      // durée d'un glissement, en fraction d'un quart
-    var AMORTI = 0.08;      // part du chemin restant parcourue à chaque image
+    var LARGEUR = 0.7;      // durée d'un glissement, en fraction d'un quart
+    var AMORTI = 0.18;      // part du chemin restant parcourue à chaque image
     var actif = -1, posActuelle = 0, cible = 0, animRoue = null;
 
     function hauteur() { return originaux[0].offsetHeight || 0; }
@@ -76,12 +76,12 @@
       placer(posActuelle + d * AMORTI);
       animRoue = requestAnimationFrame(glisser);
     }
-    // Trajet : le haut de la section passe de 55 % de l'écran à -30 %
-    // (85 % d'une hauteur d'écran), le titre reste bien visible jusqu'au dernier mot
+    // Trajet : le haut de la section passe de 50 % de l'écran à -20 %
+    // (70 % d'une hauteur d'écran), le titre reste bien visible jusqu'au dernier mot
     majRoue = function () {
       var vh = window.innerHeight || 1;
       var haut = zoneRoue.getBoundingClientRect().top;
-      var u = clamp01((0.55 * vh - haut) / (0.85 * vh)) * n;      // 0 → n
+      var u = clamp01((0.5 * vh - haut) / (0.7 * vh)) * n;      // 0 → n
       var pos = 0;
       for (var b = 1; b < n; b++) pos += doux(clamp01((u - b) / LARGEUR + 0.5));
       cible = pos;
@@ -187,7 +187,9 @@
     var w0 = Math.min(W * 0.34, 500);
     var h0 = w0 * 0.62;
     var x0 = W - w0 - m;
-    var y0 = H - h0 - m;
+    // La petite carte est placée vers le haut de l'écran : on la voit
+    // arriver en bas pendant que la fin de « Selected work » est encore en haut
+    var y0 = Math.min(H - h0 - m, H * 0.3);
 
     var x = x0 * (1 - e);
     var y = y0 * (1 - e);
@@ -278,7 +280,7 @@
 
   /* ---------- E-mail : les lettres roulent au survol ---------- */
   // Chaque lettre monte et laisse place à sa copie (en dessous), en
-  // cascade de gauche à droite ; un trait se dessine sous l'adresse.
+  // cascade de gauche à droite.
   // Tout le mouvement est en CSS (.ct-l), ici on découpe juste le texte.
   var mail = document.querySelector('.ct-email');
   var txt = mail ? mail.querySelector('.ct-email-txt') : null;

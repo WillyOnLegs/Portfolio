@@ -162,7 +162,7 @@
 }
 
 /* E-mail : au survol, chaque lettre monte et sa copie arrive par le bas
-   (en cascade), et un trait se dessine dessous */
+   (en cascade) */
 .ct-email {
   position: relative;
   align-self: flex-start
@@ -185,25 +185,6 @@
 .ct-email:hover .ct-l,
 .ct-email:focus-visible .ct-l {
   transform: translateY(-1.1em)
-}
-
-.ct-email::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -.12em;
-  height: 2px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: right center;
-  transition: transform .6s cubic-bezier(.76, 0, .24, 1)
-}
-
-.ct-email:hover::after,
-.ct-email:focus-visible::after {
-  transform: scaleX(1);
-  transform-origin: left center
 }
 
 @media (prefers-reduced-motion: reduce) {
