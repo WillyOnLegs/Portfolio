@@ -233,7 +233,7 @@
       fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } })
         .then(function (res) {
           if (!res.ok) throw new Error('Submit failed');
-          setFeedback(t('form.feedback.success', 'Message sent — thanks!'));
+          setFeedback(t('form.feedback.success', 'Message sent, thanks!'));
           form.reset();
           if (label) label.textContent = t('form.feedback.sent', 'Sent ✓');
           setTimeout(function () { btn.removeAttribute('disabled'); if (label) label.textContent = t('form.submit', 'Send message'); }, 3000);
