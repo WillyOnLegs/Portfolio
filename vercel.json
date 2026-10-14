@@ -1,16 +1,86 @@
 {
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/medias/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000, stale-while-revalidate=86400" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000, stale-while-revalidate=86400"
+        }
+      ]
     },
     {
       "source": "/(css|js)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
     },
     {
       "source": "/(.*)\\.html",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/work",
+      "destination": "/pages/projets.html"
+    },
+    {
+      "source": "/work/:slug",
+      "destination": "/pages/projets/:slug.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/pages/apropos.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/pages/contact.html"
+    },
+    {
+      "source": "/mentions-legales",
+      "destination": "/pages/mentions-legales.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/pages/projets.html",
+      "destination": "/work",
+      "permanent": true
+    },
+    {
+      "source": "/pages/projets/:slug([^/.]+)\\.html",
+      "destination": "/work/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/pages/apropos.html",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/pages/contact.html",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/pages/mentions-legales.html",
+      "destination": "/mentions-legales",
+      "permanent": true
     }
   ]
 }

@@ -498,7 +498,7 @@
     document.body.style.setProperty('--projet-bg', theme.bg);
     document.body.style.setProperty('--projet-texte', theme.texte);
     document.body.style.setProperty('--projet-accent', theme.accent);
-    document.title = 'Willyol - ' + projet.nom;
+    document.title = projet.nom + ' | WillyOL';
     history.pushState({
       spa: true,
       slug: projet.slug,

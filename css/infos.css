@@ -10,7 +10,7 @@
   --pi-bg: #0a0a0a;
   --pi-fg: #ffffff;
   --pi-2: rgba(255, 255, 255, .62);
-  --pi-3: rgba(255, 255, 255, .4);
+  --pi-3: rgba(255, 255, 255, .55);
   --pi-trait: rgba(255, 255, 255, .14);
   --pi-grille: 79vw;
   --pi-top: clamp(6.5rem, 14vh, 9rem);
@@ -573,5 +573,53 @@ a:focus-visible > .pi-roll .pi-l {
 
   .pi-titre .ltr {
     transform: none
+  }
+}
+
+/* --------------------------------------------------------------
+   Mentions légales
+   -------------------------------------------------------------- */
+.pi-legal {
+  padding: clamp(4rem, 10vh, 7rem) 0 clamp(5rem, 12vh, 9rem)
+}
+.pi-legal-bloc {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(1.6rem, 3.5vw, 2.6rem) 0;
+  border-top: 1px solid rgba(255, 255, 255, .14)
+}
+.pi-legal-bloc .pi-etiquette {
+  margin: .25rem 0 0;
+  font-weight: 400
+}
+.pi-legal-texte {
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--pi-2)
+}
+.pi-legal-texte p {
+  margin: 0 0 1em
+}
+.pi-legal-texte p:last-child {
+  margin-bottom: 0
+}
+.pi-legal-texte a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: .2em
+}
+.pi-legal-maj {
+  margin: 0;
+  padding-top: clamp(1.6rem, 3.5vw, 2.6rem);
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  font-size: .8rem;
+  letter-spacing: .03em;
+  color: var(--pi-3)
+}
+@media (max-width: 768px) {
+  .pi-legal-bloc {
+    grid-template-columns: 1fr;
+    gap: .8rem
   }
 }

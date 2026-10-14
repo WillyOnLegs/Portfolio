@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /pages/projets/projet-template.html
+
+Sitemap: https://willyol.com/sitemap.xml

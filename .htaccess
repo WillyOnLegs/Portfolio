@@ -1,9 +1,24 @@
 # NOTE : ces règles ne tournent que sur Apache (willyol.com). Sur Vercel ce fichier est ignoré.
-# Les liens du site pointent temporairement vers les vrais fichiers .html — rechercher "CLEAN-URL" / "data-clean-url" pour les remettre.
+# Les liens du site utilisent les URL propres (/work, /about, /contact, /mentions-legales).
 
 # ==============================================================
 # WillyOL — URLs propres (clean URLs)
 # ==============================================================
+
+# ==============================================================
+# HTTPS obligatoire + page 404
+# ==============================================================
+
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Laisse passer le renouvellement du certificat SSL
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
 
 DirectoryIndex index.html
 
@@ -30,9 +45,17 @@ DirectoryIndex index.html
     RewriteCond %{THE_REQUEST} \s/+pages/apropos\.html[\s?] [NC]
     RewriteRule ^ /about [R=301,L]
 
+    # /pages/mentions-legales.html  ->  /mentions-legales
+    RewriteCond %{THE_REQUEST} \s/+pages/mentions-legales\.html[\s?] [NC]
+    RewriteRule ^ /mentions-legales [R=301,L]
+
     # /pages/contact.html  ->  /contact
     RewriteCond %{THE_REQUEST} \s/+pages/contact\.html[\s?] [NC]
     RewriteRule ^ /contact [R=301,L]
+
+    # /work/flouz/  ->  /work/flouz (sans slash final, sinon les images ne se chargent pas)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(work(?:/[^/.]+)?|about|contact|mentions-legales)/$ /$1 [R=301,L]
 
     # --------------------------------------------------------------
     # 2) Réécritures internes — URL propre  ->  fichier réel
@@ -49,6 +72,9 @@ DirectoryIndex index.html
 
     # /contact  ->  /pages/contact.html
     RewriteRule ^contact/?$ /pages/contact.html [L]
+
+    # /mentions-legales  ->  /pages/mentions-legales.html
+    RewriteRule ^mentions-legales/?$ /pages/mentions-legales.html [L]
 </IfModule>
 
 # ==============================================================

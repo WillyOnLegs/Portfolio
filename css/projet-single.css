@@ -27,7 +27,7 @@
   --pp-edge: clamp(.75rem, 1.2vw, 1.25rem);
   --pp-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --pp-texte-2: color-mix(in srgb, var(--projet-texte) 62%, transparent);
-  --pp-texte-3: color-mix(in srgb, var(--projet-texte) 40%, transparent);
+  --pp-texte-3: color-mix(in srgb, var(--projet-texte) 55%, transparent);
   --pp-trait: color-mix(in srgb, var(--projet-texte) 14%, transparent);
   display: block;
   position: relative;
