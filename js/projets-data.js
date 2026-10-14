@@ -8,7 +8,7 @@ if(typeof window!=='undefined'){window.PROJETS=PROJETS;window.getProjetBySlug=ge
    Chaque projet = une liste de sections. Le titre de chaque
    section apparaît dans la colonne de gauche.
 
-   Deux types de blocs :
+   Trois types de blocs :
      { type:'full', media:M }
          → un grand contenu sur toute la largeur
            FORMAT : 3840 x 2160 (16:9, 4K)
@@ -16,6 +16,9 @@ if(typeof window!=='undefined'){window.PROJETS=PROJETS;window.getProjetBySlug=ge
          → 1 contenu vertical + 2 horizontaux empilés
            (side = côté où se place le vertical)
            FORMATS : vertical 1200 x 1500 — horizontaux 1200 x 720
+     { type:'duo', medias:[M, M] }
+         → 2 contenus côte à côte (chacun la moitié de la largeur)
+           FORMAT : 1200 x 720 chacun (comme les horizontaux du trio)
 
    Un média M :
      { src:'/medias/…', video:true, alt:'…' }
@@ -41,18 +44,17 @@ var PROJETS_SECTIONS = (function () {
         { type: 'full', media: { src: P + 'Flouz/LogoGlobal.mp4', video: true, alt: 'Flouz — Logo animé' } },
       ]},
       { titre: T('Cards', 'Cartes'), blocs: [
-        { type: 'trio', side: 'left',
-          vertical: { src: P + 'Flouz/WhiteCard.webp', alt: 'Flouz — Carte blanche transparente', pos: '45% 50%' },
-          horizontals: [
+        { type: 'duo', medias: [
             { src: P + 'Flouz/BlackCard.webp', alt: 'Flouz — Carte noire transparente' },
             { src: P + 'Flouz/BlueCard.jpg', alt: 'Flouz — Carte bleue transparente' },
           ] },
+        { type: 'full', media: { src: P + 'Flouz/WhiteCard.webp', alt: 'Flouz — Carte blanche transparente' } },
       ]},
       { titre: T('Touchpoints', 'Déclinaisons'), blocs: [
         { type: 'full', media: { src: P + 'Flouz/Mockup.mp4', video: true, alt: 'Flouz — Déclinaisons' } },
       ]},
       { titre: T('App', 'Application'), blocs: [
-        { type: 'trio', side: 'right',
+        { type: 'trio', side: 'left',
           vertical: { src: P + 'Flouz/Appstore.webp', alt: 'Flouz — Fiche App Store' },
           horizontals: [
             { src: P + 'Flouz/App.webp', alt: "Flouz — Icône sur l'écran d'accueil" },

@@ -147,6 +147,12 @@
       (b.horizontals || []).slice(0, 2).forEach(function (h) {
         bloc.appendChild(buildCell(resolve(h), 'pp-cell--h'));
       });
+    } else if (b.type === 'duo') {
+      // 2 contenus côte à côte, même format que les horizontaux du trio
+      bloc = el('div', 'pp-bloc pp-bloc--duo');
+      (b.medias || []).slice(0, 2).forEach(function (m) {
+        bloc.appendChild(buildCell(resolve(m), 'pp-cell--h'));
+      });
     } else {
       bloc = el('div', 'pp-bloc pp-bloc--full');
       bloc.appendChild(buildCell(resolve(b.media)));

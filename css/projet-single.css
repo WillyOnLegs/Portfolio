@@ -349,6 +349,17 @@
   grid-row: 2
 }
 
+/* Duo : 2 contenus côte à côte, chacun de la taille d'un horizontal du trio */
+.pp-bloc--duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pp-gap)
+}
+
+.pp-bloc--duo .pp-cell--h {
+  aspect-ratio: 1200 / 720
+}
+
 .pp-cell {
   position: relative;
   margin: 0;
