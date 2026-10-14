@@ -38,17 +38,6 @@
   overflow: hidden
 }
 
-.ab-label {
-  position: absolute;
-  top: clamp(6rem, 13vh, 8rem);
-  left: var(--marge);
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono-xs);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  opacity: .6
-}
-
 .ab-bloc {
   --ab-ligne: 1.05em;
   font-family: var(--font-titre);
@@ -80,10 +69,13 @@
   will-change: transform
 }
 
+/* Chaque mot est plus haut que la fente : l'espace vide sous le mot
+   évite qu'un bout du mot précédent dépasse au-dessus du suivant */
 .ab-mot {
   display: flex;
-  align-items: center;
-  height: var(--ab-ligne);
+  align-items: flex-start;
+  height: calc(var(--ab-ligne) + .4em);
+  padding-top: .025em;
   white-space: nowrap
 }
 
@@ -142,14 +134,6 @@
   min-width: 0
 }
 
-.ct-label {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono-xs);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  opacity: .55
-}
-
 .ct-titre {
   font-family: var(--font-titre);
   font-weight: 400;
@@ -177,14 +161,55 @@
   line-height: 1
 }
 
-.ct-email-fleche {
-  font-family: var(--font-corps);
-  font-size: .5em;
-  transition: transform .4s var(--ease-out)
+/* E-mail : au survol, chaque lettre monte et sa copie arrive par le bas
+   (en cascade), et un trait se dessine dessous */
+.ct-email {
+  position: relative;
+  align-self: flex-start
 }
 
-.ct-email:hover .ct-email-fleche {
-  transform: translate(4px, -4px)
+.ct-email-txt {
+  display: inline-flex;
+  overflow: hidden;
+  line-height: 1.1;
+  padding-top: .04em
+}
+
+.ct-l {
+  display: inline-block;
+  text-shadow: 0 1.1em currentColor;
+  transition: transform .6s cubic-bezier(.76, 0, .24, 1);
+  transition-delay: calc(var(--i, 0) * 14ms)
+}
+
+.ct-email:hover .ct-l,
+.ct-email:focus-visible .ct-l {
+  transform: translateY(-1.1em)
+}
+
+.ct-email::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -.12em;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform .6s cubic-bezier(.76, 0, .24, 1)
+}
+
+.ct-email:hover::after,
+.ct-email:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-l {
+    transition: none
+  }
 }
 
 .ct-socials {
@@ -285,7 +310,7 @@
 .bf-submit {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
   padding: 1rem 1.4rem;
   border: 0;
@@ -308,14 +333,6 @@
   transform: none
 }
 
-.bf-submit-arrow {
-  transition: transform .4s var(--ease-out)
-}
-
-.bf-submit:hover .bf-submit-arrow {
-  transform: translate(3px, -3px)
-}
-
 /* Quand la carte est petite : seule la flèche, le titre
    « Let's work together. » voyage jusqu'à sa place finale */
 .ct-preview {
@@ -332,24 +349,6 @@
 .ct-wrap.is-open .ct-preview {
   pointer-events: none;
   visibility: hidden
-}
-
-.ct-preview-fleche {
-  position: absolute;
-  right: clamp(1rem, 1.6vw, 1.5rem);
-  top: clamp(1rem, 1.6vw, 1.5rem);
-  display: grid;
-  place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 50%;
-  border: 1px solid rgba(10, 10, 10, .35);
-  opacity: calc(1 - var(--ct-p, 0) * 4)
-}
-
-.ct-preview-fleche svg {
-  width: 40%;
-  height: 40%
 }
 
 /* Le titre bouge par transform (calculé en JS) */
@@ -380,10 +379,6 @@
   .ab-stage {
     padding-left: var(--marge-nav);
     padding-right: var(--marge-nav)
-  }
-
-  .ab-label {
-    left: var(--marge-nav)
   }
 
   /* Sur téléphone, chaque mot peut tenir sur deux lignes */

@@ -3,7 +3,7 @@
    - Bento à propos : le fond passe du noir au blanc au scroll
    - Contact : la carte grandit du coin bas-droit au plein écran
      (et rapetisse si on remonte)
-   - Envoi du formulaire (Formspree) + effet sur l'e-mail
+   - Envoi du formulaire (Formspree) + lettres qui roulent sur l'e-mail
    ============================================================== */
 (function () {
   'use strict';
@@ -44,8 +44,9 @@
   /* ---------- À propos : la roue de mots ---------- */
   // La page défile normalement (rien n'est fixé). La section fait la
   // hauteur de l'écran ; pendant qu'elle traverse l'écran (100vh de
-  // scroll), chaque mot a 1/4 de ce trajet. Le passage d'un mot au
-  // suivant suit directement le scroll, dans les deux sens.
+  // scroll), chaque mot a sa part égale de ce trajet. Le passage d'un mot au
+  // suivant suit le scroll dans les deux sens, avec un glissement long
+  // et doux et un léger amorti (le mot rattrape le scroll en douceur).
   var roue = document.querySelector('.ab-roue');
   var bloc = document.querySelector('.ab-bloc');
   var zoneRoue = document.querySelector('.ab-stage');
@@ -53,8 +54,9 @@
   if (roue && bloc && zoneRoue) {
     var originaux = Array.prototype.slice.call(roue.children);
     var n = originaux.length;
-    var LARGEUR = 0.6;      // durée d'un glissement, en fraction d'un quart
-    var actif = -1, posActuelle = 0;
+    var LARGEUR = 0.9;      // durée d'un glissement, en fraction d'un quart
+    var AMORTI = 0.08;      // part du chemin restant parcourue à chaque image
+    var actif = -1, posActuelle = 0, cible = 0, animRoue = null;
 
     function hauteur() { return originaux[0].offsetHeight || 0; }
     function placer(pos) {
@@ -66,15 +68,25 @@
         for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i ? 'false' : 'true');
       }
     }
-    // Trajet : le haut de la section passe de 45 % de l'écran à -35 %,
-    // le titre reste bien visible pendant les 4 mots
+    // Courbe très douce (sinus) pour chaque glissement
+    function doux(x) { return 0.5 - 0.5 * Math.cos(Math.PI * x); }
+    function glisser() {
+      var d = cible - posActuelle;
+      if (Math.abs(d) < 0.0008) { placer(cible); animRoue = null; return; }
+      placer(posActuelle + d * AMORTI);
+      animRoue = requestAnimationFrame(glisser);
+    }
+    // Trajet : le haut de la section passe de 55 % de l'écran à -30 %
+    // (85 % d'une hauteur d'écran), le titre reste bien visible jusqu'au dernier mot
     majRoue = function () {
       var vh = window.innerHeight || 1;
       var haut = zoneRoue.getBoundingClientRect().top;
-      var u = clamp01((0.45 * vh - haut) / (0.8 * vh)) * n;      // 0 → 4
+      var u = clamp01((0.55 * vh - haut) / (0.85 * vh)) * n;      // 0 → n
       var pos = 0;
-      for (var b = 1; b < n; b++) pos += ease(clamp01((u - b) / LARGEUR + 0.5));
-      placer(pos);
+      for (var b = 1; b < n; b++) pos += doux(clamp01((u - b) / LARGEUR + 0.5));
+      cible = pos;
+      if (REDUCED) { placer(cible); return; }
+      if (!animRoue) animRoue = requestAnimationFrame(glisser);
     };
 
     // Texte le plus grand possible sans dépasser (le mot le plus long décide)
@@ -264,25 +276,22 @@
     });
   }
 
-  /* ---------- E-mail : lettres qui se mélangent au survol ---------- */
+  /* ---------- E-mail : les lettres roulent au survol ---------- */
+  // Chaque lettre monte et laisse place à sa copie (en dessous), en
+  // cascade de gauche à droite ; un trait se dessine sous l'adresse.
+  // Tout le mouvement est en CSS (.ct-l), ici on découpe juste le texte.
   var mail = document.querySelector('.ct-email');
   var txt = mail ? mail.querySelector('.ct-email-txt') : null;
-  if (mail && txt && !REDUCED) {
-    var orig = txt.textContent;
-    var pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    var rafM = null;
-    mail.addEventListener('mouseenter', function () {
-      if (rafM) cancelAnimationFrame(rafM);
-      var t0 = performance.now();
-      (function go(now) {
-        var p = Math.min(1, (now - t0) / 600);
-        var rev = Math.floor(p * orig.length);
-        txt.textContent = Array.from(orig).map(function (c, i) {
-          return i < rev || c === '@' || c === '.' ? c : pool[Math.floor(Math.random() * pool.length)];
-        }).join('');
-        if (p < 1) rafM = requestAnimationFrame(go);
-        else txt.textContent = orig;
-      })(t0);
+  if (mail && txt) {
+    var lettres = Array.from(txt.textContent.trim());
+    txt.setAttribute('aria-hidden', 'true');
+    txt.textContent = '';
+    lettres.forEach(function (c, i) {
+      var l = document.createElement('span');
+      l.className = 'ct-l';
+      l.style.setProperty('--i', i);
+      l.textContent = c;
+      txt.appendChild(l);
     });
   }
 })();
