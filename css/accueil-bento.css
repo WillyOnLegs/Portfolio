@@ -418,3 +418,34 @@
     flex: none
   }
 }
+
+/* ---------- Showreel ---------- */
+
+/* Plus près du titre « Nathan Colin, … » : remonte sur le blanc vide
+   du bas de la section à propos */
+.section-featured {
+  position: relative;
+  z-index: 1;
+  margin-top: -22vh
+}
+
+/* « Showreel » + petit chiffre à côté, comme dans Selected work */
+.featured-titre-ligne {
+  display: flex;
+  align-items: baseline;
+  gap: .6rem
+}
+
+.featured-num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono-xs);
+  letter-spacing: .05em;
+  line-height: 1;
+  color: rgba(10, 10, 10, .45)
+}
+
+@media (max-width: 900px) {
+  .section-featured {
+    margin-top: -12vh
+  }
+}

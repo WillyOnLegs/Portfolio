@@ -2,10 +2,11 @@
    WillyOL — Pages projets (composition bento)
    --------------------------------------------------------------
    - Construit la page d'un projet à partir de PROJETS (projets-data.js)
-   - Colonne gauche collante : titre, infos, description, sections
-   - Colonne droite : blocs "full" et "trio" (1 vertical + 2 horizontaux)
-   - Fin de page : la carte du projet suivant grandit jusqu'à
-     remplir la colonne, la colonne gauche bascule sur son nom.
+   - Composition centrée : grand titre, vidéo principale (toute la
+     largeur de la grille), infos + description qui se remplit au
+     scroll, puis la grille : blocs "full" et "trio"
+   - Fin de page : la carte du projet suivant part du bas à droite et
+     grandit jusqu'à remplir la zone de droite, son nom apparaît à gauche.
    - Fonctionne en chargement direct (pages/projets/*.html)
      ET en injection SPA (projet-zoom.js, depuis l'accueil / la liste)
    ============================================================== */
@@ -185,32 +186,41 @@
     var resolve = makeResolver(slug);
     var next = nextProjet(projet);
 
-    registerI18n('pp.more', { fr: 'Lire la suite', en: 'Read more' });
-    registerI18n('pp.less', { fr: 'Réduire', en: 'Show less' });
-    registerI18n('pp.sections', { fr: 'Sections du projet', en: 'Project sections' });
-
     var shell = opts.into || el('main');
     shell.className = 'proj-page-shell pp';
     shell.setAttribute('data-slug', slug);
     shell.innerHTML = '';
 
+    // Composition centrée :
+    // 1. grand titre (vers 25 % de la hauteur de l'écran)
+    // 2. vidéo principale, toute la largeur de la grille
+    // 3. infos + description (le texte se remplit au scroll)
+    // 4. le reste de la grille
+    // 5. projet suivant (la carte reste à droite et grandit)
     var layout = el('div', 'pp-layout');
     shell.appendChild(layout);
 
-    /* ----- Colonne gauche ----- */
-    var side = el('aside', 'pp-side');
-    var inner = el('div', 'pp-side-inner');
-    side.appendChild(inner);
-
-    var main = el('div', 'pp-side-main');
-    inner.appendChild(main);
-
-    var head = el('header', 'pp-head');
+    /* ----- 1. Titre ----- */
+    var intro = el('header', 'pp-intro');
     var h1 = el('h1', 'pp-titre');
     h1.textContent = projet.nom;
-    head.appendChild(h1);
-    main.appendChild(head);
+    intro.appendChild(h1);
+    layout.appendChild(intro);
 
+    /* ----- 2 à 4. Grille centrée ----- */
+    var content = el('div', 'pp-content');
+    layout.appendChild(content);
+
+    // Vidéo principale : le premier bloc du projet
+    var heroBloc = null;
+    if (sections.length && sections[0].blocs && sections[0].blocs.length) {
+      heroBloc = buildBloc(sections[0].blocs[0], resolve);
+      heroBloc.classList.add('pp-bloc--hero');
+      content.appendChild(heroBloc);
+    }
+
+    // Infos + description
+    var info = el('div', 'pp-info');
     var cr = projet.credits || {};
     var dl = el('dl', 'pp-credits');
     [
@@ -230,9 +240,8 @@
       row.appendChild(dd);
       dl.appendChild(row);
     });
-    main.appendChild(dl);
+    info.appendChild(dl);
 
-    var descWrap = el('div', 'pp-desc-wrap');
     var desc = el('div', 'pp-desc');
     var descKey = 'proj.' + slug + '.intro';
     if (window.traductions && window.traductions[descKey]) {
@@ -243,33 +252,30 @@
       p.textContent = projet.description || '';
       desc.appendChild(p);
     }
-    descWrap.appendChild(desc);
-    main.appendChild(descWrap);
+    info.appendChild(desc);
+    content.appendChild(info);
 
-    var toggle = el('button', 'pp-desc-toggle', { type: 'button', 'data-i18n': 'pp.more', 'aria-expanded': 'false', 'data-curseur': true, hidden: true });
-    toggle.textContent = t('pp.more', 'Read more');
-    main.appendChild(toggle);
+    // Le reste de la grille
+    sections.forEach(function (s, i) {
+      var blocs = (s.blocs || []).slice(i === 0 && heroBloc ? 1 : 0);
+      var sec = el('section', 'pp-section', { id: 'pp-s-' + i, 'data-idx': i });
+      var key = 'pp.' + slug + '.s' + i;
+      registerI18n(key, s.titre || { en: 'Part ' + (i + 1), fr: 'Partie ' + (i + 1) });
+      var st = el('h2', 'pp-section-titre', { 'data-i18n': key });
+      st.textContent = t(key);
+      sec.appendChild(st);
+      blocs.forEach(function (b) { sec.appendChild(buildBloc(b, resolve)); });
+      if (blocs.length) content.appendChild(sec);
+    });
 
-    if (sections.length) {
-      var nav = el('div', 'pp-secnav', { role: 'navigation', 'aria-label': t('pp.sections', 'Project sections') });
-      sections.forEach(function (s, i) {
-        var key = 'pp.' + slug + '.s' + i;
-        registerI18n(key, s.titre || { en: 'Part ' + (i + 1), fr: 'Partie ' + (i + 1) });
-        var item = el('button', 'pp-secnav-item', { type: 'button', 'data-idx': i, 'data-curseur': true });
-        var tt = el('span', 'pp-secnav-titre', { 'data-i18n': key });
-        tt.textContent = t(key);
-        var num = el('span', 'pp-secnav-num', { 'aria-hidden': 'true' });
-        num.textContent = String(i + 1).padStart(2, '0');
-        item.appendChild(tt);
-        item.appendChild(num);
-        nav.appendChild(item);
-      });
-      main.appendChild(nav);
-    }
-
-    // Bloc « projet suivant », révélé à la fin de la page
+    /* ----- 5. Projet suivant ----- */
     var hasNext = next && next.slug !== slug;
     if (hasNext) {
+      var outro = el('section', 'pp-outro', { 'aria-label': t('projet.suivant', 'Next project') });
+      var stage = el('div', 'pp-outro-stage');
+
+      // Nom du projet suivant + liens, à gauche (révélés à la fin)
+      var gauche = el('div', 'pp-outro-gauche');
       var nx = el('div', 'pp-side-next', { 'aria-hidden': 'true' });
       var nxLabel = el('p', 'pp-next-label', { 'data-i18n': 'projet.suivant' });
       nxLabel.textContent = t('projet.suivant', 'Next project');
@@ -290,33 +296,10 @@
       nx.appendChild(nxLabel);
       nx.appendChild(nxName);
       nx.appendChild(nxLinks);
-      inner.appendChild(nx);
-    }
+      gauche.appendChild(nx);
+      stage.appendChild(gauche);
 
-    layout.appendChild(side);
-
-    /* ----- Colonne droite ----- */
-    var content = el('div', 'pp-content');
-    var first = true;
-    sections.forEach(function (s, i) {
-      var sec = el('section', 'pp-section', { id: 'pp-s-' + i, 'data-idx': i });
-      var st = el('h2', 'pp-section-titre', { 'data-i18n': 'pp.' + slug + '.s' + i });
-      st.textContent = t('pp.' + slug + '.s' + i);
-      sec.appendChild(st);
-      (s.blocs || []).forEach(function (b) {
-        var bloc = buildBloc(b, resolve);
-        if (first) {
-          bloc.classList.add('pp-bloc--hero');
-          first = false;
-        }
-        sec.appendChild(bloc);
-      });
-      content.appendChild(sec);
-    });
-
-    if (hasNext) {
-      var outro = el('section', 'pp-outro', { 'aria-label': t('projet.suivant', 'Next project') });
-      var stage = el('div', 'pp-outro-stage');
+      // La carte : part du bas à droite et grandit
       var card = el('a', 'pp-outro-card', { href: next.href, 'data-curseur': true, 'aria-label': next.nom });
       var cover = rebase(next.cover);
       if (next.coverIsVideo) {
@@ -345,12 +328,10 @@
       card.appendChild(cta);
       stage.appendChild(card);
       outro.appendChild(stage);
-      content.appendChild(outro);
+      layout.appendChild(outro);
     } else {
-      content.appendChild(el('div', 'pp-fin'));
+      layout.appendChild(el('div', 'pp-fin'));
     }
-
-    layout.appendChild(content);
 
     // Le hero reprend la vidéo là où en était le clone (transition SPA)
     if (opts.videoStartTime > 0) {
@@ -371,10 +352,9 @@
   function measureHeroRect() {
     var probe = el('main', 'proj-page-shell pp pp--probe', { 'aria-hidden': 'true' });
     probe.innerHTML =
-      '<div class="pp-layout"><aside class="pp-side"><div class="pp-side-inner"></div></aside>' +
-      '<div class="pp-content"><section class="pp-section"><h2 class="pp-section-titre">x</h2>' +
-      '<div class="pp-bloc pp-bloc--full pp-bloc--hero"><figure class="pp-cell"></figure></div>' +
-      '</section></div></div>';
+      '<div class="pp-layout"><header class="pp-intro"><h1 class="pp-titre">x</h1></header>' +
+      '<div class="pp-content"><div class="pp-bloc pp-bloc--full pp-bloc--hero"><figure class="pp-cell"></figure></div>' +
+      '</div></div>';
     document.body.appendChild(probe);
     var fig = probe.querySelector('.pp-cell');
     var r = fig.getBoundingClientRect();
@@ -560,124 +540,86 @@
     cleanups.push(function () { io.disconnect(); });
   }
 
-  /* ---------- Description : « Lire la suite » si elle déborde ---------- */
+  /* ---------- Description : le texte se remplit au scroll ---------- */
+  // Chaque mot part en gris clair et passe à la couleur pleine, dans
+  // l'ordre de lecture, à mesure que le texte monte dans l'écran.
+  // En remontant, les mots repassent en gris.
 
-  function initDesc(root, cleanups) {
-    var wrap = root.querySelector('.pp-desc-wrap');
+  function initDescFill(root, scroller, cleanups) {
     var desc = root.querySelector('.pp-desc');
-    var btn = root.querySelector('.pp-desc-toggle');
-    var inner = root.querySelector('.pp-side-inner');
-    if (!wrap || !desc || !btn || !inner) return;
+    if (!desc) return;
+    var mots = [];
+    var etats = [];
+    var DOUX = 6;           // nombre de mots sur lesquels se fait le dégradé
 
-    function check() {
-      if (inner.classList.contains('is-desc-open')) return;
-      var over = MQ_DESKTOP.matches && desc.scrollHeight > wrap.clientHeight + 2;
-      wrap.classList.toggle('is-clamped', over);
-      btn.hidden = !over;
+    function decouper() {
+      mo.disconnect();
+      var walker = document.createTreeWalker(desc, NodeFilter.SHOW_TEXT, null);
+      var noeuds = [];
+      while (walker.nextNode()) noeuds.push(walker.currentNode);
+      noeuds.forEach(function (n) {
+        if (n.parentNode && n.parentNode.classList && n.parentNode.classList.contains('pp-mot')) return;
+        var morceaux = n.textContent.split(/(\s+)/);
+        if (morceaux.length < 2 && !morceaux[0].trim()) return;
+        var frag = document.createDocumentFragment();
+        morceaux.forEach(function (m) {
+          if (!m) return;
+          if (/^\s+$/.test(m)) { frag.appendChild(document.createTextNode(m)); return; }
+          var sp = document.createElement('span');
+          sp.className = 'pp-mot';
+          sp.textContent = m;
+          frag.appendChild(sp);
+        });
+        n.parentNode.replaceChild(frag, n);
+      });
+      mots = Array.prototype.slice.call(desc.querySelectorAll('.pp-mot'));
+      etats = mots.map(function () { return -1; });
+      mo.observe(desc, { childList: true, subtree: true });
+      maj();
     }
 
-    btn.addEventListener('click', function () {
-      var open = !inner.classList.contains('is-desc-open');
-      inner.classList.toggle('is-desc-open', open);
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.setAttribute('data-i18n', open ? 'pp.less' : 'pp.more');
-      btn.textContent = t(open ? 'pp.less' : 'pp.more');
-      if (open) {
-        wrap.classList.remove('is-clamped');
-        wrap.setAttribute('data-lenis-prevent', '');
-      } else {
-        wrap.removeAttribute('data-lenis-prevent');
-        wrap.scrollTop = 0;
-        requestAnimationFrame(check);
+    function maj() {
+      if (!mots.length) return;
+      if (REDUCED) {
+        mots.forEach(function (m) { m.style.opacity = ''; m.classList.add('is-plein'); });
+        return;
       }
-    });
-
-    var ro = ('ResizeObserver' in window) ? new ResizeObserver(check) : null;
-    if (ro) { ro.observe(wrap); ro.observe(desc); }
-    window.addEventListener('resize', check);
-    check();
-    var tm = setTimeout(check, 400);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
-    cleanups.push(function () {
-      if (ro) ro.disconnect();
-      window.removeEventListener('resize', check);
-      clearTimeout(tm);
-    });
-  }
-
-  /* ---------- Sections : titre actif + clic ---------- */
-
-  function initSecNav(root, scroller, cleanups) {
-    var items = Array.prototype.slice.call(root.querySelectorAll('.pp-secnav-item'));
-    var secs = Array.prototype.slice.call(root.querySelectorAll('.pp-section'));
-    var outro = root.querySelector('.pp-outro');
-    if (!items.length || !secs.length) return;
-    var actif = -1;
-    var timer = null;
-
-    function topOffset() {
-      var c = root.querySelector('.pp-content');
-      return c ? parseFloat(getComputedStyle(c).paddingTop) || 0 : 0;
-    }
-
-    // Même logique que la page Projets : l'ancien s'efface, puis le nouveau s'allume
-    function activer(idx) {
-      if (idx === actif) return;
-      actif = idx;
-      items.forEach(function (it) {
-        it.style.transition = it.classList.contains('actif') ? 'opacity 0.3s ease' : 'none';
-        it.classList.remove('actif');
-        it.removeAttribute('aria-current');
-      });
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        items.forEach(function (it) { it.style.transition = ''; });
-        if (items[idx]) {
-          items[idx].classList.add('actif');
-          items[idx].setAttribute('aria-current', 'true');
+      var vh = window.innerHeight || 1;
+      var r = desc.getBoundingClientRect();
+      // commence quand le haut du texte est à 85 % de l'écran,
+      // finit quand le bas du texte arrive vers 50 %
+      var p = clamp01((vh * 0.85 - r.top) / (r.height + vh * 0.35));
+      var x = p * (mots.length + DOUX);
+      for (var i = 0; i < mots.length; i++) {
+        var v = Math.round(clamp01((x - i) / DOUX) * 50) / 50;
+        if (v !== etats[i]) {
+          etats[i] = v;
+          mots[i].style.opacity = (0.2 + 0.8 * v).toFixed(2);
         }
-      }, 300);
+      }
     }
-
-    function update() {
-      var ligne = window.innerHeight * 0.45;
-      var idx = 0;
-      secs.forEach(function (s, i) {
-        if (s.getBoundingClientRect().top <= ligne) idx = i;
-      });
-      activer(idx);
-    }
-
-    items.forEach(function (it, i) {
-      it.addEventListener('click', function () {
-        if (secs[i]) scroller.scrollToEl(secs[i], topOffset());
-      });
-    });
 
     var raf = null;
-    function onScroll() {
-      if (raf) return;
-      raf = requestAnimationFrame(function () { raf = null; update(); });
-    }
+    function onScroll() { if (!raf) raf = requestAnimationFrame(function () { raf = null; maj(); }); }
+    // le texte change quand on passe en FR / EN : on redécoupe
+    var mo = new MutationObserver(function () { decouper(); });
+    decouper();
     scroller.target.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
-    update();
     cleanups.push(function () {
+      mo.disconnect();
       scroller.target.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
-      clearTimeout(timer);
     });
   }
-
-  /* ---------- Fin de page : la carte du projet suivant grandit ---------- */
 
   function initOutro(root, scroller, cleanups) {
     var outro = root.querySelector('.pp-outro');
     var stage = root.querySelector('.pp-outro-stage');
     var card = root.querySelector('.pp-outro-card');
-    var inner = root.querySelector('.pp-side-inner');
     var nextBlock = root.querySelector('.pp-side-next');
     if (!outro || !stage || !card) return;
+    var inner = outro;
 
     var lastP = -1;
 
@@ -699,7 +641,9 @@
       var cs = getComputedStyle(stage);
       var padT = parseFloat(cs.paddingTop) || 0;
       var padB = parseFloat(cs.paddingBottom) || 0;
-      var W = stage.clientWidth;
+      var padL = parseFloat(cs.paddingLeft) || 0;
+      var padR = parseFloat(cs.paddingRight) || 0;
+      var W = stage.clientWidth - padL - padR;
       var H = stage.clientHeight - padT - padB;
 
       var e = REDUCED ? (p > 0.5 ? 1 : 0) : easeInOutCubic(p);
@@ -708,7 +652,7 @@
       var x0 = W - w0;
       var y0 = H - h0;
 
-      card.style.left = (x0 * (1 - e)) + 'px';
+      card.style.left = (padL + x0 * (1 - e)) + 'px';
       card.style.top = (padT + y0 * (1 - e)) + 'px';
       card.style.width = (w0 + (W - w0) * e) + 'px';
       card.style.height = (h0 + (H - h0) * e) + 'px';
@@ -780,8 +724,7 @@
     splitTitle(root);
     initReveal(root, scroller, cleanups);
     initVideos(root, scroller, cleanups);
-    initDesc(root, cleanups);
-    initSecNav(root, scroller, cleanups);
+    initDescFill(root, scroller, cleanups);
     initOutro(root, scroller, cleanups);
     initProgressBar(root, scroller, cleanups);
 

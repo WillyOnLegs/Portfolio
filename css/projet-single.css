@@ -1,7 +1,8 @@
 /* ==============================================================
-   WillyOL — Pages projets : composition bento
-   Colonne gauche collante (titre, infos, sections)
-   Colonne droite : grille de contenus
+   WillyOL — Pages projets : composition centrée
+   Grand titre, vidéo principale, description qui se remplit au
+   scroll, puis la grille de contenus (centrée).
+   Fin de page : la carte du projet suivant reste à droite
    ============================================================== */
 
 .page-projet-single {
@@ -63,58 +64,33 @@
 }
 
 .pp-layout {
-  display: flex;
-  align-items: stretch
+  display: block
 }
 
 /* --------------------------------------------------------------
-   Colonne gauche
+   1. Grand titre (centre vers 25 % de la hauteur de l'écran)
    -------------------------------------------------------------- */
 
-.pp-side {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  width: var(--pp-side-w);
-  flex-shrink: 0;
-  z-index: 2
-}
-
-.pp-side-inner {
-  position: relative;
-  height: 100%;
+.pp-intro {
+  height: 52vh;
+  height: 52svh;
+  min-height: 18rem;
   display: flex;
-  flex-direction: column;
-  padding: var(--pp-top) clamp(1.5rem, 2.6vw, 3rem) clamp(1.5rem, 4vh, 2.6rem) var(--marge-nav);
-  container-type: inline-size
+  align-items: center;
+  justify-content: center;
+  padding: var(--pp-top) var(--pp-edge) clamp(1rem, 3vh, 2rem);
+  text-align: center
 }
 
-.pp-side-main {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  opacity: calc(1 - var(--pp-outro, 0) * 2);
-  transform: translateY(calc(var(--pp-outro, 0) * -2rem));
-  will-change: opacity, transform
-}
-
-.is-outro .pp-side-main {
-  pointer-events: none
-}
-
-/* Titre */
 .pp-titre {
   font-family: var(--font-titre);
   font-weight: 400;
   text-transform: uppercase;
-  font-size: clamp(2.4rem, 4.4vw, 5.5rem);
-  font-size: min(5.5rem, calc(100cqi / (var(--len, 6) * .5)));
-  line-height: .95;
+  /* le plus grand possible sans dépasser la largeur */
+  font-size: min(12rem, calc(88vw / (var(--len, 6) * .48)));
+  line-height: .9;
   letter-spacing: .005em;
-  /* le haut des capitales s'aligne sur le haut de la 1re image */
-  margin: -.04em 0 0;
+  margin: 0;
   white-space: nowrap
 }
 
@@ -137,14 +113,23 @@
   transition-delay: var(--ad, 0s)
 }
 
-/* Infos */
-.pp-credits {
+/* --------------------------------------------------------------
+   3. Infos + description (sous la vidéo principale)
+   -------------------------------------------------------------- */
+
+.pp-info {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .9rem 1.5rem;
-  margin: clamp(1.4rem, 3.6vh, 2.4rem) 0 0;
-  padding-top: clamp(.9rem, 2vh, 1.2rem);
-  border-top: 1px solid var(--pp-trait)
+  grid-template-columns: 1fr 2fr;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(3.5rem, 12vh, 8rem) 0 clamp(4rem, 14vh, 9rem)
+}
+
+.pp-credits {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  margin: 0;
+  padding-top: .35rem
 }
 
 .pp-credits div {
@@ -165,134 +150,41 @@
   line-height: 1.35
 }
 
-/* Description */
-.pp-desc-wrap {
-  position: relative;
-  margin-top: clamp(1rem, 2.6vh, 1.8rem);
-  flex: 0 1 auto;
-  min-height: 4.8em;
-  overflow: hidden
-}
-
 .pp-desc {
-  font-size: clamp(.85rem, .88vw, .95rem);
-  line-height: 1.6;
-  color: var(--pp-texte-2);
-  max-width: 48ch
+  font-size: clamp(1.1rem, 1.55vw, 1.75rem);
+  line-height: 1.38;
+  letter-spacing: -.005em;
+  color: var(--projet-texte);
+  max-width: 44ch
 }
 
 .pp-desc p {
-  margin: 0 0 .8em
+  margin: 0 0 1em
 }
 
 .pp-desc p:last-child {
   margin-bottom: 0
 }
 
-.pp-desc-wrap.is-clamped::after {
-  content: '';
+/* chaque mot : gris clair → couleur pleine (opacité pilotée en JS) */
+.pp-mot {
+  opacity: .2
+}
+
+/* --------------------------------------------------------------
+   5. Projet suivant : nom à gauche, carte à droite
+   -------------------------------------------------------------- */
+
+.pp-outro-gauche {
   position: absolute;
   left: 0;
-  right: 0;
+  top: 0;
   bottom: 0;
-  height: 3.2em;
-  background: linear-gradient(to bottom, transparent, var(--projet-bg));
+  width: var(--pp-side-w);
+  container-type: inline-size;
   pointer-events: none
 }
 
-.pp-desc-toggle {
-  align-self: flex-start;
-  margin-top: .55rem;
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--projet-texte);
-  font: inherit;
-  font-size: .78rem;
-  text-decoration: underline;
-  text-underline-offset: .25em;
-  text-decoration-color: var(--pp-texte-3);
-  cursor: pointer
-}
-
-.pp-desc-toggle[hidden] {
-  display: none
-}
-
-.is-desc-open .pp-desc-wrap {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin
-}
-
-.is-desc-open .pp-secnav {
-  display: none
-}
-
-/* Sections — même logique visuelle que la liste de la page Projets */
-.pp-secnav {
-  margin-top: auto;
-  padding-top: clamp(1.2rem, 3vh, 2.2rem);
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start
-}
-
-.pp-secnav-item {
-  display: flex;
-  align-items: baseline;
-  gap: .25em;
-  padding: .22rem 0;
-  margin: 0;
-  background: none;
-  border: 0;
-  color: var(--projet-texte);
-  text-align: left;
-  cursor: pointer;
-  opacity: .18;
-  transform: translateX(0);
-  transition: opacity .35s ease, transform .6s cubic-bezier(0.25, 0.46, 0.45, 0.94)
-}
-
-.pp-secnav-item.actif {
-  opacity: 1;
-  transform: translateX(10px)
-}
-
-.pp-secnav-item:not(.actif):hover {
-  opacity: .42
-}
-
-.pp-secnav-titre {
-  font-family: var(--font-titre);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: clamp(1.4rem, 2vw, 2.5rem);
-  letter-spacing: .02em;
-  line-height: 1;
-  white-space: nowrap;
-  padding-right: .15em
-}
-
-.pp-secnav-item.actif .pp-secnav-titre {
-  font-style: italic
-}
-
-.pp-secnav-num {
-  font-size: var(--fs-mono-xs, .75rem);
-  letter-spacing: .05em;
-  line-height: 1;
-  color: var(--pp-texte-3);
-  transition: color .35s ease
-}
-
-.pp-secnav-item.actif .pp-secnav-num {
-  color: var(--projet-accent)
-}
-
-/* Projet suivant (révélé en fin de page) */
 .pp-side-next {
   position: absolute;
   left: var(--marge-nav);
@@ -304,7 +196,7 @@
   will-change: opacity, transform
 }
 
-.is-outro .pp-side-next {
+.pp-outro.is-outro .pp-side-next {
   pointer-events: auto
 }
 
@@ -351,7 +243,7 @@
 }
 
 /* --------------------------------------------------------------
-   Colonne droite : grille bento
+   2 et 4. Grille centrée (même largeur qu'avant)
    -------------------------------------------------------------- */
 
 /* Formats (comme koto.com) :
@@ -362,11 +254,10 @@
    très légèrement recadré, ~3 %, comme sur koto.com).
    Un seul écart partout, proportionnel à la largeur de la colonne. */
 .pp-content {
-  flex: 1;
-  min-width: 0;
+  width: calc(100% - var(--pp-side-w) - var(--pp-edge));
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  padding: var(--pp-top) var(--pp-edge) 0 0;
   container-type: inline-size
 }
 
@@ -380,8 +271,7 @@
   gap: var(--pp-gap)
 }
 
-.pp-section + .pp-section,
-.pp-content > .pp-outro {
+.pp-section + .pp-section {
   margin-top: var(--pp-gap)
 }
 
@@ -550,15 +440,17 @@
 
 .pp-outro {
   position: relative;
-  height: 210vh
+  height: 210vh;
+  margin-top: var(--pp-gap)
 }
 
+/* la carte grandit dans la zone de droite (l'ancienne colonne) */
 .pp-outro-stage {
   position: sticky;
   top: 0;
   height: 100vh;
   height: 100svh;
-  padding: var(--pp-top) 0 var(--pp-edge)
+  padding: var(--pp-top) var(--pp-edge) var(--pp-edge) var(--pp-side-w)
 }
 
 .pp-outro-card {
@@ -686,44 +578,36 @@
     --pp-edge: clamp(.75rem, 3vw, 1.25rem)
   }
 
-  .pp-layout {
-    flex-direction: column
-  }
-
-  .pp-side {
-    position: relative;
+  .pp-intro {
     height: auto;
-    width: 100%
+    min-height: 0;
+    padding: var(--pp-top) var(--pp-edge) clamp(1.5rem, 6vw, 2.5rem)
   }
 
-  .pp-side-inner {
-    padding: var(--pp-top) var(--pp-edge) clamp(1.5rem, 5vw, 2.5rem)
-  }
-
-  .pp-side-main {
-    opacity: 1;
-    transform: none
-  }
-
-  .pp-titre,
-  .pp-next-nom {
-    font-size: min(5rem, calc(100cqi / (var(--len, 6) * .5)))
-  }
-
-  .pp-desc-wrap {
-    overflow: visible;
-    min-height: 0
-  }
-
-  .pp-desc-wrap::after,
-  .pp-desc-toggle,
-  .pp-secnav,
-  .pp-side-next {
-    display: none !important
+  .pp-titre {
+    font-size: min(7rem, calc(92vw / (var(--len, 6) * .48)))
   }
 
   .pp-content {
+    width: auto;
+    margin: 0;
     padding: 0 var(--pp-edge)
+  }
+
+  .pp-info {
+    grid-template-columns: 1fr;
+    padding: clamp(2.5rem, 10vw, 4rem) 0
+  }
+
+  .pp-credits {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .9rem 1.5rem;
+    order: 2
+  }
+
+  .pp-desc {
+    font-size: clamp(1.05rem, 4.6vw, 1.35rem)
   }
 
   .pp-section + .pp-section {
@@ -744,10 +628,6 @@
     line-height: 1
   }
 
-  .pp-section:first-child .pp-section-titre {
-    margin-top: 0
-  }
-
   .pp-bloc--trio .pp-cell--v {
     grid-column: 1 / -1 !important;
     grid-row: 1 !important;
@@ -765,9 +645,13 @@
     grid-row: 2 !important
   }
 
-  .pp-content > .pp-outro {
+  .pp-outro {
     height: auto;
-    margin: calc(var(--pp-gap) * 4) 0 var(--pp-edge)
+    margin: calc(var(--pp-gap) * 4) var(--pp-edge) var(--pp-edge)
+  }
+
+  .pp-outro-gauche {
+    display: none
   }
 
   .pp-outro-stage {
@@ -803,18 +687,13 @@
   }
 
   .pp-credits {
-    gap: .6rem 1.2rem
-  }
-
-  .pp-secnav-titre {
-    font-size: clamp(1.2rem, 1.7vw, 1.9rem)
+    gap: .6rem
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pp-titre .ltr,
   .pp-media,
-  .pp-secnav-item,
   .pp-outro-cta {
     transition: none !important;
     transform: none !important

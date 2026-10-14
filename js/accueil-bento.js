@@ -42,11 +42,11 @@
   }
 
   /* ---------- À propos : la roue de mots ---------- */
-  // La page défile normalement (rien n'est fixé). La section fait la
-  // hauteur de l'écran ; pendant qu'elle traverse l'écran (100vh de
-  // scroll), chaque mot a sa part égale de ce trajet. Le passage d'un mot au
-  // suivant suit le scroll dans les deux sens, avec un glissement long
-  // et doux et un léger amorti (le mot rattrape le scroll en douceur).
+  // La page défile normalement (rien n'est fixé). Le trajet du titre dans
+  // l'écran est coupé en parts égales, une par mot. Quand le scroll passe
+  // d'une part à l'autre (dans un sens ou dans l'autre), le mot glisse
+  // vers le suivant avec un mouvement à durée fixe, toujours le même
+  // rythme quelle que soit la vitesse du scroll.
   var roue = document.querySelector('.ab-roue');
   var bloc = document.querySelector('.ab-bloc');
   var zoneRoue = document.querySelector('.ab-stage');
@@ -54,9 +54,10 @@
   if (roue && bloc && zoneRoue) {
     var originaux = Array.prototype.slice.call(roue.children);
     var n = originaux.length;
-    var LARGEUR = 0.7;      // durée d'un glissement, en fraction d'un quart
-    var AMORTI = 0.18;      // part du chemin restant parcourue à chaque image
-    var actif = -1, posActuelle = 0, cible = 0, animRoue = null;
+    var DUREE = 850;        // durée d'un glissement (ms)
+    var MARGE = 0.12;       // petite tolérance aux limites : pas d'aller-retour nerveux
+    var actif = -1, posActuelle = 0, indice = 0;
+    var anim = null;        // { de, vers, t0, courbe }
 
     function hauteur() { return originaux[0].offsetHeight || 0; }
     function placer(pos) {
@@ -68,13 +69,27 @@
         for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i ? 'false' : 'true');
       }
     }
-    // Courbe très douce (sinus) pour chaque glissement
-    function doux(x) { return 0.5 - 0.5 * Math.cos(Math.PI * x); }
-    function glisser() {
-      var d = cible - posActuelle;
-      if (Math.abs(d) < 0.0008) { placer(cible); animRoue = null; return; }
-      placer(posActuelle + d * AMORTI);
-      animRoue = requestAnimationFrame(glisser);
+    // Départ et arrivée en douceur ; si on relance pendant un glissement,
+    // on repart sans freiner (sortie douce seulement)
+    function entreeSortie(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function sortie(x) { return 1 - Math.pow(1 - x, 3); }
+    function image(now) {
+      var x = Math.min(1, (now - anim.t0) / anim.duree);
+      placer(anim.de + (anim.vers - anim.de) * anim.courbe(x));
+      if (x < 1) anim.raf = requestAnimationFrame(image);
+      else anim = null;
+    }
+    function allerA(i) {
+      if (REDUCED) { placer(i); return; }
+      var enCours = !!anim;
+      if (anim) cancelAnimationFrame(anim.raf);
+      var ecart = Math.abs(i - posActuelle);
+      anim = {
+        de: posActuelle, vers: i, t0: performance.now(),
+        duree: DUREE * Math.min(1.4, Math.max(0.6, ecart)),
+        courbe: enCours ? sortie : entreeSortie
+      };
+      anim.raf = requestAnimationFrame(image);
     }
     // Trajet : le haut de la section passe de 50 % de l'écran à -20 %
     // (70 % d'une hauteur d'écran), le titre reste bien visible jusqu'au dernier mot
@@ -82,11 +97,10 @@
       var vh = window.innerHeight || 1;
       var haut = zoneRoue.getBoundingClientRect().top;
       var u = clamp01((0.5 * vh - haut) / (0.7 * vh)) * n;      // 0 → n
-      var pos = 0;
-      for (var b = 1; b < n; b++) pos += doux(clamp01((u - b) / LARGEUR + 0.5));
-      cible = pos;
-      if (REDUCED) { placer(cible); return; }
-      if (!animRoue) animRoue = requestAnimationFrame(glisser);
+      var i = indice;
+      while (i < n - 1 && u >= i + 1 + MARGE) i++;
+      while (i > 0 && u < i - MARGE) i--;
+      if (i !== indice) { indice = i; allerA(i); }
     };
 
     // Texte le plus grand possible sans dépasser (le mot le plus long décide)
@@ -187,7 +201,8 @@
     var w0 = Math.min(W * 0.34, 500);
     var h0 = w0 * 0.62;
     var x0 = W - w0 - m;
-    var y0 = H - h0 - m;
+    // un peu au-dessus du bas de l'écran : on la voit arriver plus tôt
+    var y0 = H - h0 - m - H * 0.12;
 
     var x = x0 * (1 - e);
     var y = y0 * (1 - e);
