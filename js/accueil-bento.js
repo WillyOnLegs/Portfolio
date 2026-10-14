@@ -201,8 +201,7 @@
     var w0 = Math.min(W * 0.34, 500);
     var h0 = w0 * 0.62;
     var x0 = W - w0 - m;
-    // un peu au-dessus du bas de l'écran : on la voit arriver plus tôt
-    var y0 = H - h0 - m - H * 0.12;
+    var y0 = H - h0 - m;
 
     var x = x0 * (1 - e);
     var y = y0 * (1 - e);
