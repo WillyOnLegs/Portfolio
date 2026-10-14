@@ -22,17 +22,13 @@
   display: none
 }
 
-/* Zone de scroll : l'écran reste calé (sticky) pendant que les 4 mots
-   défilent, chaque mot a 1/4 de la zone (≈ 60vh de scroll chacun) */
+/* Section de la hauteur de l'écran, qui défile normalement */
 .ab-roue-zone {
-  position: relative;
-  height: calc(100vh + 240vh);
-  height: calc(100svh + 240vh)
+  position: relative
 }
 
 .ab-stage {
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100vh;
   height: 100svh;
   display: flex;

@@ -42,18 +42,18 @@
   }
 
   /* ---------- À propos : la roue de mots ---------- */
-  // La section reste calée sur l'écran pendant que la zone défile.
-  // Le scroll de la zone est coupé en 4 parts égales, une par mot :
-  // chaque passage d'un mot au suivant suit directement le scroll
-  // (glissement continu, pas de saut), centré sur la limite entre deux parts.
+  // La page défile normalement (rien n'est fixé). La section fait la
+  // hauteur de l'écran ; pendant qu'elle traverse l'écran (100vh de
+  // scroll), chaque mot a 1/4 de ce trajet. Le passage d'un mot au
+  // suivant suit directement le scroll, dans les deux sens.
   var roue = document.querySelector('.ab-roue');
   var bloc = document.querySelector('.ab-bloc');
-  var zoneRoue = document.querySelector('.ab-roue-zone');
+  var zoneRoue = document.querySelector('.ab-stage');
   var majRoue = function () {};
   if (roue && bloc && zoneRoue) {
     var originaux = Array.prototype.slice.call(roue.children);
     var n = originaux.length;
-    var LARGEUR = 0.6;      // durée d'un glissement, en fraction d'une part
+    var LARGEUR = 0.6;      // durée d'un glissement, en fraction d'un quart
     var actif = -1, posActuelle = 0;
 
     function hauteur() { return originaux[0].offsetHeight || 0; }
@@ -66,32 +66,12 @@
         for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i ? 'false' : 'true');
       }
     }
-    // Le bloc blanc de la vitrine remonte encore un peu (accueil.js,
-    // --contenu-offset) au moment où la zone arrive : on attend qu'il soit
-    // posé pour commencer les 4 parts, sinon le titre change trop tôt.
-    var scene = document.querySelector('.hero-scene');
-    var PART = 0.6;         // longueur d'une part, en hauteur d'écran
-    var debutRoue = 0, finRoue = 1;
-    function decalagePx() {
-      return (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--contenu-offset')) || 0) * window.innerHeight / 100;
-    }
-    function caler() {
-      var vh = window.innerHeight;
-      var y = window.scrollY || window.pageYOffset;
-      var haut = zoneRoue.getBoundingClientRect().top + y - decalagePx();   // position sans le décalage
-      var finBloc = haut;
-      if (scene) {
-        var sh = scene.offsetHeight;
-        finBloc = scene.getBoundingClientRect().top + y + (sh - vh) * 0.7 + vh * 1.5;
-      }
-      var attente = Math.max(0, finBloc - haut);
-      zoneRoue.style.height = (vh + attente + PART * n * vh) + 'px';
-      debutRoue = haut + attente;
-      finRoue = debutRoue + PART * n * vh;
-    }
+    // Trajet : le haut de la section passe de 45 % de l'écran à -35 %,
+    // le titre reste bien visible pendant les 4 mots
     majRoue = function () {
-      var y = window.scrollY || window.pageYOffset;
-      var u = clamp01((y - debutRoue) / (finRoue - debutRoue)) * n;   // 0 → 4
+      var vh = window.innerHeight || 1;
+      var haut = zoneRoue.getBoundingClientRect().top;
+      var u = clamp01((0.45 * vh - haut) / (0.8 * vh)) * n;      // 0 → 4
       var pos = 0;
       for (var b = 1; b < n; b++) pos += ease(clamp01((u - b) / LARGEUR + 0.5));
       placer(pos);
@@ -99,7 +79,6 @@
 
     // Texte le plus grand possible sans dépasser (le mot le plus long décide)
     function ajuster() {
-      caler();
       bloc.style.removeProperty('--ab-taille');
       if (!MQ_DESKTOP.matches) {
         // Téléphone : chaque mot doit tenir sur 2 lignes maximum
