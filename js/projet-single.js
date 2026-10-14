@@ -157,6 +157,12 @@
       bloc = el('div', 'pp-bloc pp-bloc--full');
       bloc.appendChild(buildCell(resolve(b.media)));
     }
+    // format imposé (ex. '1 / 1', '3508 / 4961') : les cases prennent la
+    // proportion de l'image au lieu du format habituel, rien n'est recadré
+    if (b.ratio) {
+      bloc.classList.add('pp-bloc--ratio');
+      bloc.querySelectorAll('.pp-cell').forEach(function (c) { c.style.aspectRatio = b.ratio; });
+    }
     return bloc;
   }
 
