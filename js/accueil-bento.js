@@ -187,9 +187,7 @@
     var w0 = Math.min(W * 0.34, 500);
     var h0 = w0 * 0.62;
     var x0 = W - w0 - m;
-    // La petite carte est placée vers le haut de l'écran : on la voit
-    // arriver en bas pendant que la fin de « Selected work » est encore en haut
-    var y0 = Math.min(H - h0 - m, H * 0.3);
+    var y0 = H - h0 - m;
 
     var x = x0 * (1 - e);
     var y = y0 * (1 - e);
@@ -230,9 +228,37 @@
   }
 
   var raf = null;
-  function maj() { raf = null; majFond(); majRoue(); majContact(); }
+  /* ---------- Fin de « Selected work » plus tôt ----------
+     À la fin de « Selected work », la dernière vidéo est centrée dans le
+     panneau noir et laisse du noir vide en dessous. Le contact (noir aussi)
+     remonte de cette hauteur : la carte arrive en bas de l'écran pendant
+     que la dernière vidéo est encore en haut, sans rien chevaucher. */
+  // La taille des vidéos n'est connue qu'une fois le panneau noir ouvert :
+  // on mesure à ce moment-là, quand le contact est encore loin sous l'écran
+  // (le changement de marge ne se voit pas).
+  var aMesurer = true;
+  function remonterContact() {
+    if (!ctWrap || !aMesurer) return;
+    if (!MQ_DESKTOP.matches) { ctWrap.style.marginTop = ''; aMesurer = false; return; }
+    var split = document.querySelector('.selected-split');
+    var panneau = document.querySelector('.selected-panel');
+    var medias = document.querySelectorAll('.selected-main .selected-media');
+    if (!split || !panneau || !medias.length) return;
+    var H = window.innerHeight;
+    var hm = medias[medias.length - 1].offsetHeight;
+    if (!hm || panneau.offsetHeight < H - 2) return;              // panneau pas encore ouvert
+    if (ctWrap.getBoundingClientRect().top < H * 1.5) return;     // contact trop proche : on attend
+    var cs = getComputedStyle(split);
+    var hautP = parseFloat(cs.paddingTop) || 0, basP = parseFloat(cs.paddingBottom) || 0;
+    var basMedia = hautP + (H - hautP - basP) / 2 + hm / 2;
+    var vide = Math.max(0, H - basMedia - basP);
+    ctWrap.style.marginTop = (-vide).toFixed(0) + 'px';
+    aMesurer = false;
+  }
+
+  function maj() { raf = null; remonterContact(); majFond(); majRoue(); majContact(); }
   function onScroll() { if (!raf) raf = requestAnimationFrame(maj); }
-  function onResize() { fin = null; onScroll(); }
+  function onResize() { fin = null; aMesurer = true; onScroll(); }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onResize);
   if (MQ_DESKTOP.addEventListener) MQ_DESKTOP.addEventListener('change', onResize);
