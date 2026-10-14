@@ -42,38 +42,87 @@
   }
 
   /* ---------- À propos : la roue de mots ---------- */
-  // « Nathan Colin, » reste en place, la fin de la phrase change au fil du
-  // scroll : le mot affiché dépend de la position du titre dans l'écran.
-  // Rien ne bloque la page ; en remontant, les mots reviennent dans l'ordre.
+  // La section reste calée sur l'écran pendant que la zone défile.
+  // Le scroll de la zone est coupé en 4 parts égales, une par mot :
+  // chaque passage d'un mot au suivant suit directement le scroll
+  // (glissement continu, pas de saut), centré sur la limite entre deux parts.
   var roue = document.querySelector('.ab-roue');
   var bloc = document.querySelector('.ab-bloc');
+  var zoneRoue = document.querySelector('.ab-roue-zone');
   var majRoue = function () {};
-  if (roue && bloc) {
+  if (roue && bloc && zoneRoue) {
     var originaux = Array.prototype.slice.call(roue.children);
     var n = originaux.length;
-    var idx = -1;
+    var LARGEUR = 0.6;      // durée d'un glissement, en fraction d'une part
+    var actif = -1, posActuelle = 0;
 
-    function hauteur() { return originaux[0].offsetHeight || parseFloat(getComputedStyle(originaux[0]).lineHeight) || 0; }
-    function placer(i, anime) {
-      roue.classList.toggle('sans-transition', !anime || REDUCED);
-      roue.style.transform = 'translateY(' + (-i * hauteur()) + 'px)';
-      for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i ? 'false' : 'true');
+    function hauteur() { return originaux[0].offsetHeight || 0; }
+    function placer(pos) {
+      posActuelle = pos;
+      roue.style.transform = 'translate3d(0,' + (-pos * hauteur()).toFixed(2) + 'px,0)';
+      var i = Math.round(pos);
+      if (i !== actif) {
+        actif = i;
+        for (var k = 0; k < n; k++) originaux[k].setAttribute('aria-hidden', k === i ? 'false' : 'true');
+      }
     }
-    // Le titre entre par le bas (85 % de l'écran) → 1er mot,
-    // il monte jusqu'à 20 % du haut → dernier mot
+    // Le bloc blanc de la vitrine remonte encore un peu (accueil.js,
+    // --contenu-offset) au moment où la zone arrive : on attend qu'il soit
+    // posé pour commencer les 4 parts, sinon le titre change trop tôt.
+    var scene = document.querySelector('.hero-scene');
+    var PART = 0.6;         // longueur d'une part, en hauteur d'écran
+    var debutRoue = 0, finRoue = 1;
+    function decalagePx() {
+      return (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--contenu-offset')) || 0) * window.innerHeight / 100;
+    }
+    function caler() {
+      var vh = window.innerHeight;
+      var y = window.scrollY || window.pageYOffset;
+      var haut = zoneRoue.getBoundingClientRect().top + y - decalagePx();   // position sans le décalage
+      var finBloc = haut;
+      if (scene) {
+        var sh = scene.offsetHeight;
+        finBloc = scene.getBoundingClientRect().top + y + (sh - vh) * 0.7 + vh * 1.5;
+      }
+      var attente = Math.max(0, finBloc - haut);
+      zoneRoue.style.height = (vh + attente + PART * n * vh) + 'px';
+      debutRoue = haut + attente;
+      finRoue = debutRoue + PART * n * vh;
+    }
     majRoue = function () {
-      var r = bloc.getBoundingClientRect();
-      var vh = window.innerHeight || 1;
-      var c = (r.top + r.height / 2) / vh;
-      var p = clamp01((0.8 - c) / 0.55);
-      var i = Math.min(n - 1, Math.floor(p * n));
-      if (i !== idx) { var premier = idx < 0; idx = i; placer(i, !premier); }
+      var y = window.scrollY || window.pageYOffset;
+      var u = clamp01((y - debutRoue) / (finRoue - debutRoue)) * n;   // 0 → 4
+      var pos = 0;
+      for (var b = 1; b < n; b++) pos += ease(clamp01((u - b) / LARGEUR + 0.5));
+      placer(pos);
     };
 
     // Texte le plus grand possible sans dépasser (le mot le plus long décide)
     function ajuster() {
+      caler();
       bloc.style.removeProperty('--ab-taille');
-      if (!MQ_DESKTOP.matches) { placer(Math.max(idx, 0), false); return; }
+      if (!MQ_DESKTOP.matches) {
+        // Téléphone : chaque mot doit tenir sur 2 lignes maximum
+        var largeur = bloc.clientWidth;
+        var taille = parseFloat(getComputedStyle(bloc).fontSize);
+        for (var essai = 0; essai < 12; essai++) {
+          var trop = originaux.some(function (el) {
+            var m = document.createElement('span');
+            m.className = el.className;
+            m.style.cssText = 'position:absolute;visibility:hidden;display:block;height:auto;white-space:normal;width:' + largeur + 'px;font-size:' + taille + 'px';
+            m.textContent = el.textContent;
+            bloc.appendChild(m);
+            var h = m.getBoundingClientRect().height;
+            m.remove();
+            return h > taille * 2.05;
+          });
+          if (!trop) break;
+          taille *= 0.92;
+        }
+        if (essai > 0) bloc.style.setProperty('--ab-taille', taille + 'px');
+        placer(posActuelle);
+        return;
+      }
       var dispo = bloc.clientWidth, max = 0;
       originaux.concat([bloc.querySelector('.ab-fixe')]).forEach(function (el) {
         var mesure = document.createElement('span');
@@ -89,7 +138,7 @@
         var taille = parseFloat(getComputedStyle(bloc).fontSize) * dispo / max * 0.98;
         bloc.style.setProperty('--ab-taille', taille + 'px');
       }
-      placer(Math.max(idx, 0), false);
+      placer(posActuelle);
     }
 
     window.addEventListener('resize', ajuster);

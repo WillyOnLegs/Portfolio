@@ -22,20 +22,24 @@
   display: none
 }
 
-/* Section de hauteur normale : rien ne bloque le scroll.
-   La fin de la phrase tourne toute seule quand elle est à l'écran. */
+/* Zone de scroll : l'écran reste calé (sticky) pendant que les 4 mots
+   défilent, chaque mot a 1/4 de la zone (≈ 60vh de scroll chacun) */
 .ab-roue-zone {
-  position: relative
+  position: relative;
+  height: calc(100vh + 240vh);
+  height: calc(100svh + 240vh)
 }
 
 .ab-stage {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(6rem, 13vh, 8rem) var(--marge) clamp(3rem, 8vh, 5rem)
+  padding: clamp(6rem, 13vh, 8rem) var(--marge) clamp(3rem, 8vh, 5rem);
+  overflow: hidden
 }
 
 .ab-label {
@@ -77,12 +81,7 @@
   left: 0;
   top: 0;
   right: 0;
-  will-change: transform;
-  transition: transform .9s cubic-bezier(.76, 0, .24, 1)
-}
-
-.ab-roue.sans-transition {
-  transition: none
+  will-change: transform
 }
 
 .ab-mot {
@@ -394,7 +393,7 @@
   /* Sur téléphone, chaque mot peut tenir sur deux lignes */
   .ab-bloc {
     --ab-ligne: 2.1em;
-    font-size: clamp(3rem, 15vw, 6rem)
+    font-size: var(--ab-taille, clamp(3rem, 15vw, 6rem))
   }
 
   .ab-mot {
