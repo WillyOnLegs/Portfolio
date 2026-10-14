@@ -22,7 +22,7 @@
   /* grille centrée : environ 10,5 % de marge de chaque côté */
   --pp-grille-w: 79vw;
   /* taille du texte de description (reprise par les infos) */
-  --pp-desc-fs: clamp(1.1rem, 1.55vw, 1.75rem);
+  --pp-desc-fs: clamp(.98rem, 1.25vw, 1.45rem);
   --pp-top: clamp(6.5rem, 14vh, 9rem);
   --pp-edge: clamp(.75rem, 1.2vw, 1.25rem);
   --pp-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -137,7 +137,8 @@
 
 .pp-info {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  /* la description commence vers 42 % de la grille et va jusqu'à son bord droit */
+  grid-template-columns: 1fr 1.4fr;
   gap: clamp(1.5rem, 3vw, 3rem);
   padding: clamp(2.5rem, 8vh, 5rem) 0 clamp(4rem, 14vh, 9rem)
 }
@@ -174,7 +175,7 @@
   line-height: 1.38;
   letter-spacing: -.005em;
   color: var(--projet-texte);
-  max-width: 44ch
+  max-width: none
 }
 
 .pp-desc p {
