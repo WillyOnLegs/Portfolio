@@ -192,8 +192,8 @@
     shell.innerHTML = '';
 
     // Composition centrée :
-    // 1. grand titre au centre de l'écran
-    // 2. vidéo principale (largeur de la grille), révélée par une fenêtre
+    // 1. titre (animation d'arrivée : grand au centre, puis se pose)
+    // 2. vidéo principale (largeur de la grille), dévoilée de bas en haut
     // 3. infos + description (le texte se remplit au scroll)
     // 4. le reste de la grille
     // 5. projet suivant (la carte reste à droite et grandit)
@@ -201,9 +201,8 @@
     shell.appendChild(layout);
 
     /* ----- 1 et 2. Titre + vidéo principale ----- */
-    // Écran collant : le titre géant au centre, la vidéo déjà à sa place
-    // (largeur de la grille) mais masquée. Au scroll, une petite fenêtre
-    // au milieu du titre s'ouvre jusqu'aux bords de la vidéo (initIntro).
+    // Le titre au-dessus de la vidéo (largeur de la grille).
+    // À l'arrivée, une animation les met en place (initIntro).
     var intro = el('section', 'pp-intro');
     var stageIntro = el('div', 'pp-intro-stage');
     var h1 = el('h1', 'pp-titre');
@@ -363,18 +362,7 @@
     var r = fig.getBoundingClientRect();
     var radius = parseFloat(getComputedStyle(fig).borderTopLeftRadius) || 0;
     document.body.removeChild(probe);
-    // Sur ordinateur, la vidéo arrive masquée : le zoom vise la petite fenêtre
-    if (MQ_DESKTOP.matches && !REDUCED) {
-      var f = fenetreDepart(r.width);
-      return { top: r.top + (r.height - f.h) / 2, left: r.left + (r.width - f.w) / 2, width: f.w, height: f.h, radius: radius * 0.6 };
-    }
     return { top: r.top, left: r.left, width: r.width, height: r.height, radius: radius };
-  }
-
-  // Petite fenêtre de départ (16:9), au milieu du titre
-  function fenetreDepart(largeurVideo) {
-    var w = Math.min(largeurVideo, window.innerWidth * 0.2);
-    return { w: w, h: w * 9 / 16 };
   }
 
   /* ---------- Défilement (fenêtre ou shell injecté) ---------- */
@@ -554,72 +542,73 @@
     cleanups.push(function () { io.disconnect(); });
   }
 
-  /* ---------- Haut de page : la fenêtre s'ouvre ---------- */
-  // La vidéo est à sa place finale mais masquée : on n'en voit qu'une petite
-  // fenêtre au milieu du titre. En scrollant, la fenêtre s'ouvre jusqu'aux
-  // bords de la vidéo ; l'image se découvre sans grossir (léger recul
-  // à l'intérieur) et le titre recule derrière. Ordinateur seulement.
+  /* ---------- Haut de page : animation d'ouverture ---------- */
+  // Joue tout seul à l'arrivée sur la page (pas au scroll) :
+  // 1. le titre apparaît en très grand au centre de l'écran (lettres qui montent)
+  // 2. il rétrécit et monte se poser à sa place, au-dessus de la vidéo
+  // 3. la vidéo, déjà à sa place, se dévoile de bas en haut (léger recul de l'image)
+  // 4. le reste de la page apparaît en fondu
+  // Pas d'animation si on arrive par le zoom depuis l'accueil, si la page
+  // est déjà scrollée, ou avec « réduire les animations ».
 
-  function studio(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2; }
-  function lerp(a, b, t) { return a + (b - a) * t; }
+  var COURBE = 'cubic-bezier(.76, 0, .24, 1)';
 
   function initIntro(root, scroller, cleanups, opts) {
-    var intro = root.querySelector('.pp-intro');
-    var stage = root.querySelector('.pp-intro-stage');
     var titre = root.querySelector('.pp-titre');
-    var bloc = root.querySelector('.pp-intro .pp-bloc--hero');
-    var cell = bloc ? bloc.querySelector('.pp-cell') : null;
-    if (!intro || !stage || !cell) return;
+    var cell = root.querySelector('.pp-intro .pp-bloc--hero .pp-cell');
+    if (!titre || !cell || REDUCED || (opts && opts.spa)) return;
+    if (typeof titre.animate !== 'function') return;
+    var haut = scroller.injected ? root.scrollTop : (window.scrollY || window.pageYOffset);
+    if (haut > 10) return;
 
-    // La petite fenêtre apparaît juste après le titre (tout de suite si on
-    // arrive par la transition depuis l'accueil : le zoom y atterrit)
-    var apparait = opts && opts.spa ? 1 : 0;
-    var tween = null;
-    if (!apparait) {
-      var t0 = performance.now() + 750;
-      tween = requestAnimationFrame(function tick(now) {
-        apparait = studio(clamp01((now - t0) / 900));
-        maj();
-        if (apparait < 1) tween = requestAnimationFrame(tick);
-        else tween = null;
-      });
-    }
+    var vh = scroller.injected ? root.clientHeight : window.innerHeight;
+    var r = titre.getBoundingClientRect();
+    if (!r.width) return;
+    var echelle = Math.min(1.8, (window.innerWidth * 0.9) / r.width);
+    var dy = vh / 2 - (r.top + r.height / 2);
+    var depart = 'translateY(' + dy.toFixed(1) + 'px) scale(' + echelle.toFixed(3) + ')';
+    var rayon = parseFloat(getComputedStyle(cell).borderTopLeftRadius) || 0;
+    var cache = 'inset(100% 0% 0% 0% round ' + rayon + 'px)';
+    var visible = 'inset(0% 0% 0% 0% round ' + rayon + 'px)';
+    var media = cell.querySelector('.pp-media');
 
-    function effacer() {
-      cell.style.clipPath = '';
-      bloc.style.removeProperty('--pp-hero-zoom');
-      if (titre) { titre.style.removeProperty('--pp-t-s'); titre.style.removeProperty('--pp-t-o'); }
-    }
+    // le reste de la page (infos, description, grille) arrive après la vidéo
+    var suite = root.querySelector('.pp-content');
 
-    function maj() {
-      if (!MQ_DESKTOP.matches || REDUCED) { effacer(); return; }
-      var r = intro.getBoundingClientRect();
-      var course = intro.offsetHeight - stage.offsetHeight;
-      var o = studio(course > 0 ? clamp01(-r.top / (course * 0.9)) : 1);
-      var W = cell.offsetWidth, H = cell.offsetHeight;
-      var f = fenetreDepart(W);
-      var w = lerp(f.w * apparait, W, o), h = lerp(f.h * apparait, H, o);
-      var rayon = parseFloat(getComputedStyle(cell).borderTopLeftRadius) || 0;
-      var ix = ((W - w) / 2).toFixed(1), iy = ((H - h) / 2).toFixed(1);
-      cell.style.clipPath = 'inset(' + iy + 'px ' + ix + 'px ' + iy + 'px ' + ix + 'px round ' + lerp(rayon * 0.6, rayon, o).toFixed(1) + 'px)';
-      bloc.style.setProperty('--pp-hero-zoom', lerp(1.25, 1, o).toFixed(4));
-      if (titre) {
-        titre.style.setProperty('--pp-t-s', lerp(1, 0.9, o).toFixed(4));
-        titre.style.setProperty('--pp-t-o', lerp(1, 0.35, o).toFixed(3));
-      }
-    }
+    // état de départ, avant le premier affichage
+    titre.style.transform = depart;
+    cell.style.clipPath = cache;
+    if (suite) suite.style.opacity = '0';
 
-    var raf = null;
-    function onScroll() { if (!raf) raf = requestAnimationFrame(function () { raf = null; maj(); }); }
-    scroller.target.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    if (MQ_DESKTOP.addEventListener) MQ_DESKTOP.addEventListener('change', onScroll);
-    maj();
+    var anims = [];
+    var minuteurs = [];
+    // 2. le titre se pose (après l'arrivée des lettres)
+    minuteurs.push(setTimeout(function () {
+      var a = titre.animate([{ transform: depart }, { transform: 'none' }], { duration: 1300, easing: COURBE, fill: 'forwards' });
+      a.onfinish = function () { titre.style.transform = ''; a.cancel(); };
+      anims.push(a);
+    }, 1050));
+    // 3. la vidéo se dévoile de bas en haut
+    minuteurs.push(setTimeout(function () {
+      var a = cell.animate([{ clipPath: cache }, { clipPath: visible }], { duration: 1400, easing: COURBE, fill: 'forwards' });
+      a.onfinish = function () { cell.style.clipPath = ''; a.cancel(); };
+      anims.push(a);
+      if (media) anims.push(media.animate([{ transform: 'scale(1.2)' }, { transform: 'scale(1)' }], { duration: 1700, easing: 'cubic-bezier(.22, 1, .36, 1)' }));
+    }, 1250));
+    // 4. la suite de la page apparaît en fondu
+    minuteurs.push(setTimeout(function () {
+      if (!suite) return;
+      var a = suite.animate([{ opacity: 0, transform: 'translateY(1.5rem)' }, { opacity: 1, transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+      suite.style.opacity = '';
+      anims.push(a);
+    }, 2100));
+
     cleanups.push(function () {
-      if (tween) cancelAnimationFrame(tween);
-      scroller.target.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (MQ_DESKTOP.removeEventListener) MQ_DESKTOP.removeEventListener('change', onScroll);
+      minuteurs.forEach(clearTimeout);
+      anims.forEach(function (a) { try { a.cancel(); } catch (_) {} });
+      titre.style.transform = '';
+      cell.style.clipPath = '';
+      if (suite) suite.style.opacity = '';
     });
   }
 

@@ -72,64 +72,44 @@
 }
 
 /* --------------------------------------------------------------
-   1 et 2. Titre + vidéo principale : la fenêtre s'ouvre au scroll
-   L'écran reste calé pendant ~90vh de scroll (la page défile, rien
-   ne bloque) : la vidéo, déjà à sa place, se découvre par une fenêtre
-   qui part du milieu du titre (voir initIntro).
+   1 et 2. Titre + vidéo principale
+   Le titre est posé au-dessus de la vidéo (largeur de la grille).
+   À l'arrivée, une animation le montre d'abord en grand au centre de
+   l'écran, puis la vidéo se dévoile de bas en haut (voir initIntro).
+   La page défile normalement, rien n'est calé au scroll.
    -------------------------------------------------------------- */
 
 .pp-intro {
-  position: relative;
-  height: calc(100vh + 90vh);
-  height: calc(100svh + 90vh)
+  padding-top: var(--pp-top)
 }
 
 .pp-intro-stage {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  overflow: hidden
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 3vh, 2rem)
 }
 
 .pp-titre {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  z-index: 1;
+  position: relative;
+  z-index: 2;
   font-family: var(--font-titre);
   font-weight: 400;
   text-transform: uppercase;
   text-align: center;
-  /* le plus grand possible sans dépasser la largeur */
-  font-size: min(22vw, calc(90vw / (var(--len, 6) * .48)));
+  font-size: min(12vw, calc(80vw / (var(--len, 6) * .48)));
   line-height: .86;
   letter-spacing: .005em;
   margin: 0;
   white-space: nowrap;
-  opacity: var(--pp-t-o, 1);
-  transform: translateY(-50%) scale(var(--pp-t-s, 1));
-  will-change: transform, opacity
+  transform-origin: 50% 50%;
+  will-change: transform
 }
 
 .pp-intro .pp-bloc--hero {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 2;
-  width: var(--pp-grille-w);
-  transform: translate(-50%, -50%)
-}
-
-.pp-intro .pp-bloc--hero .pp-cell {
-  will-change: clip-path
-}
-
-/* léger recul de l'image pendant l'ouverture */
-.pp-intro .pp-bloc--hero .pp-media {
-  transform: scale(var(--pp-hero-zoom, 1));
-  transition: none
+  position: relative;
+  z-index: 1;
+  width: var(--pp-grille-w)
 }
 
 .pp-titre-ligne {
@@ -159,7 +139,7 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: clamp(1.5rem, 3vw, 3rem);
-  padding: clamp(1rem, 4vh, 3rem) 0 clamp(4rem, 14vh, 9rem)
+  padding: clamp(2.5rem, 8vh, 5rem) 0 clamp(4rem, 14vh, 9rem)
 }
 
 .pp-credits {
@@ -620,34 +600,15 @@
   }
 
   .pp-intro {
-    height: auto;
     padding: var(--pp-top) var(--pp-edge) 0
   }
 
-  .pp-intro-stage {
-    position: static;
-    height: auto;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(1.5rem, 6vw, 2.5rem)
-  }
-
   .pp-titre {
-    position: static;
-    transform: none;
-    opacity: 1;
     font-size: min(7rem, calc(92vw / (var(--len, 6) * .48)))
   }
 
   .pp-intro .pp-bloc--hero {
-    position: static;
-    width: auto;
-    transform: none
-  }
-
-  .pp-info {
-    padding-top: clamp(2.5rem, 10vw, 4rem)
+    width: 100%
   }
 
   .pp-content {
