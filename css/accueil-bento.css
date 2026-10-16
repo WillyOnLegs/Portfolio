@@ -92,10 +92,13 @@
 
 .ct-wrap {
   position: relative;
-  height: 180vh;
+  height: 200vh;
   background: var(--noir);
-  z-index: 2
+  z-index: 2;
+  pointer-events: none
 }
+
+.ct-card { pointer-events: auto }
 
 .ct-stage {
   position: sticky;
@@ -375,6 +378,7 @@
 
   .ct-wrap {
     height: auto;
+    pointer-events: auto;
     padding: 0 var(--marge-nav) var(--marge-nav)
   }
 

@@ -195,7 +195,11 @@
     var H = ctStage.clientHeight;
     var zone = ctWrap.offsetHeight - H;
     var p = zone > 0 ? clamp01(-r.top / zone) : 1;
-    var e = REDUCED ? (p > 0.5 ? 1 : 0) : ease(p);
+    // 1re partie : la carte naît dans le coin bas-droit (elle grandit sur place, sans défiler)
+    // 2e partie : elle s'étend jusqu'au plein écran
+    var NAIT = 0.22;
+    var a = REDUCED ? (p > 0 ? 1 : 0) : ease(clamp01(p / NAIT));
+    var e = REDUCED ? (p > 0.5 ? 1 : 0) : ease(clamp01((p - NAIT) / (1 - NAIT)));
 
     var m = parseFloat(getComputedStyle(ctInner).paddingRight) || 24;
     var w0 = Math.min(W * 0.34, 500);
@@ -203,15 +207,22 @@
     var x0 = W - w0 - m;
     var y0 = H - h0 - m;
 
-    var x = x0 * (1 - e);
-    var y = y0 * (1 - e);
-    var w = w0 + (W - w0) * e;
-    var h = h0 + (H - h0) * e;
+    var x, y, w, h;
+    if (e <= 0) {
+      w = w0 * a; h = h0 * a;
+      x = W - m - w; y = H - m - h;
+    } else {
+      x = x0 * (1 - e);
+      y = y0 * (1 - e);
+      w = w0 + (W - w0) * e;
+      h = h0 + (H - h0) * e;
+    }
     ctCard.style.left = x + 'px';
     ctCard.style.top = y + 'px';
     ctCard.style.width = w + 'px';
     ctCard.style.height = h + 'px';
-    ctCard.style.setProperty('--ct-r', (20 * (1 - e)).toFixed(2) + 'px');
+    ctCard.style.visibility = w < 1 ? 'hidden' : '';
+    ctCard.style.setProperty('--ct-r', (20 * (1 - e) * Math.min(1, a * 1.5)).toFixed(2) + 'px');
     // le contenu reste fixe à l'écran, la carte le dévoile comme une fenêtre
     ctInner.style.left = (-x) + 'px';
     ctInner.style.top = (-y) + 'px';
@@ -222,9 +233,9 @@
       var pad = Math.max(16, Math.min(24, W * 0.016));
       var s0 = Math.min(1, (w0 * 0.62) / fin.w);
       var s = s0 + (1 - s0) * e;
-      // ancré à la carte : il reste toujours dans sa fenêtre
-      var px = x + pad + (fin.x - pad) * e;
-      var py = y + (h - pad - fin.h * s) * (1 - e) + fin.y * e;
+      var xc = x0 * (1 - e), yc = y0 * (1 - e), hc = h0 + (H - h0) * e;
+      var px = xc + pad + (fin.x - pad) * e;
+      var py = yc + (hc - pad - fin.h * s) * (1 - e) + fin.y * e;
       ctTitre.style.transform = 'translate(' + (px - fin.x).toFixed(2) + 'px,' + (py - fin.y).toFixed(2) + 'px) scale(' + s.toFixed(4) + ')';
     }
 
@@ -250,40 +261,25 @@
   // La taille des vidéos n'est connue qu'une fois le panneau noir ouvert :
   // on mesure à ce moment-là, quand le contact est encore loin sous l'écran
   // (le changement de marge ne se voit pas).
-  var aMesurer = true;
+  // Le contact recouvre le dernier écran de « Selected work » (fond transparent) :
+  // sa scène est déjà fixée quand le dernier projet est en place, la carte n'a
+  // donc plus qu'à naître dans le coin et s'étendre, sans défiler.
   function remonterContact() {
-    if (!ctWrap || !aMesurer) return;
-    if (!MQ_DESKTOP.matches) { ctWrap.style.marginTop = ''; ctWrap.style.background = ''; aMesurer = false; return; }
-    var split = document.querySelector('.selected-split');
-    var panneau = document.querySelector('.selected-panel');
-    var medias = document.querySelectorAll('.selected-main .selected-media');
-    if (!split || !panneau || !medias.length) return;
-    var H = window.innerHeight;
-    var hm = medias[medias.length - 1].offsetHeight;
-    if (!hm || panneau.offsetHeight < H - 2) return;              // panneau pas encore ouvert
-    if (ctWrap.getBoundingClientRect().top < H * 1.5) return;     // contact trop proche : on attend
-    var cs = getComputedStyle(split);
-    var hautP = parseFloat(cs.paddingTop) || 0, basP = parseFloat(cs.paddingBottom) || 0;
-    var basMedia = hautP + (H - hautP - basP) / 2 + hm / 2;
-    var vide = Math.max(0, H - basMedia - basP);
-    // la carte « Let's work together » arrive juste sous la dernière vidéo, sans la chevaucher :
-    // le haut du contact est transparent sur cette hauteur (on voit le noir du Selected work derrière)
-    var Wc = ctStage.clientWidth || window.innerWidth;
-    var mC = parseFloat(getComputedStyle(ctInner).paddingRight) || 24;
-    var h0C = Math.min(Wc * 0.34, 500) * 0.62;
-    var avance = Math.max(0, H - h0C - mC - H * 0.06);
-    ctWrap.style.marginTop = (-(vide + avance)).toFixed(0) + 'px';
-    ctWrap.style.background = 'linear-gradient(transparent ' + avance.toFixed(0) + 'px, var(--noir) ' + avance.toFixed(0) + 'px)';
-    aMesurer = false;
+    if (!ctWrap) return;
+    if (!MQ_DESKTOP.matches) { ctWrap.style.marginTop = ''; ctWrap.style.background = ''; return; }
+    var H = ctStage.clientHeight || window.innerHeight;
+    ctWrap.style.marginTop = (-H) + 'px';
+    ctWrap.style.background = 'linear-gradient(transparent ' + H + 'px, var(--noir) ' + H + 'px)';
   }
 
-  function maj() { raf = null; remonterContact(); majFond(); majRoue(); majContact(); }
+  function maj() { raf = null; majFond(); majRoue(); majContact(); }
   function onScroll() { if (!raf) raf = requestAnimationFrame(maj); }
-  function onResize() { fin = null; aMesurer = true; onScroll(); }
+  function onResize() { fin = null; remonterContact(); onScroll(); }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onResize);
   if (MQ_DESKTOP.addEventListener) MQ_DESKTOP.addEventListener('change', onResize);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
+  remonterContact();
   maj();
 
   /* ---------- Formulaire ---------- */
