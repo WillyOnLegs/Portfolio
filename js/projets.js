@@ -40,11 +40,12 @@ function ouvrirPopup(){popup.style.display='flex';void popup.offsetHeight;popup.
 function fermerPopup(){popup.classList.remove('visible');backdrop.classList.remove('visible');dotsBtn.classList.remove('actif');setTimeout(()=>{popup.style.display='none';},250);}
 dotsBtn.addEventListener('click',(e)=>{e.stopPropagation();popup.classList.contains('visible')?fermerPopup():ouvrirPopup();});backdrop.addEventListener('click',fermerPopup);popup.addEventListener('click',(e)=>{const item=e.target.closest('.filtre-dropdown-item');if(!item)return;const group=item.dataset.popupGroup;if(group==='industrie'){filtreIndustrie=item.dataset.filtreIndustrie;dropdownIndustrie.querySelectorAll('.filtre-dropdown-item').forEach(i=>{i.classList.toggle('actif',i.dataset.filtreIndustrie===filtreIndustrie);});const valEl=dropdownIndustrie.querySelector('.filtre-dropdown-val');const btn=dropdownIndustrie.querySelector('.filtre-dropdown-btn');valEl.textContent=filtreIndustrie==='all'?tr('filtres.industrie','By Industry'):item.textContent;btn.classList.toggle('actif',filtreIndustrie!=='all');}else{filtreType=item.dataset.filtreType;dropdownType.querySelectorAll('.filtre-dropdown-item').forEach(i=>{i.classList.toggle('actif',i.dataset.filtreType===filtreType);});const valEl=dropdownType.querySelector('.filtre-dropdown-val');const btn=dropdownType.querySelector('.filtre-dropdown-btn');valEl.textContent=filtreType==='all'?tr('filtres.type','By Type'):item.textContent;btn.classList.toggle('actif',filtreType!=='all');}
 appliquerFiltres();fermerPopup();});}}
-/* Vue grille : 1 projet en grand (pleine largeur), puis 2 côte à côte, etc. — comme la grille des pages projets.
-   Recalculé à chaque filtre : seuls les projets visibles comptent. */
+/* Vue grille : motif « 1 + 2 » (une grande à gauche, deux à droite), comme la grille des pages projets.
+   S'il reste 1 ou 2 projets à la fin, ils passent en duo côte à côte. Recalculé à chaque filtre. */
 (function(){const liste=document.getElementById('projets-liste');if(!liste)return;
-function majMosaique(){const vis=Array.from(liste.querySelectorAll('.projet-item')).filter(a=>a.style.display!=='none');
-vis.forEach((a,i)=>{const pos=i%3;const seulEnBas=(pos===1&&i===vis.length-1);a.classList.toggle('pg-full',pos===0||seulEnBas);});}
+function majMosaique(){const vis=Array.from(liste.querySelectorAll('.projet-item')).filter(a=>a.style.display!=='none');const n=vis.length;const reste=n%3;
+let nbTrios=Math.floor(n/3);let duoDepuis=n;if(reste===2)duoDepuis=n-2;else if(reste===1&&nbTrios>0)duoDepuis=n-4;
+vis.forEach((a,i)=>{const duo=i>=duoDepuis||n===1;a.classList.toggle('pg-duo',duo);a.classList.toggle('pg-big',!duo&&i%3===0);});}
 let t=null;const plan=()=>{if(t)return;t=requestAnimationFrame(()=>{t=null;majMosaique();});};
 new MutationObserver(plan).observe(liste,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
 majMosaique();})();
