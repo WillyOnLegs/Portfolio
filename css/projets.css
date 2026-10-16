@@ -39,39 +39,13 @@
 }
 
 /* ==============================================================
-   Vue liste (ordinateur) : projets serrés. À gauche, en haut un
-   grand titre qui roule avec le scroll (type et année dessous),
-   et en dessous la petite liste de tous les projets.
+   Vue liste : covers collées (petit écart régulier, sans traits),
+   et plus de type ni d'année.
    ============================================================== */
+.vue-liste .projet-meta{display:none !important}
 @media(min-width:901px){
-  .vue-liste.a-split .split-nav{justify-content:center;gap:clamp(2rem,5vh,3.5rem)}
-  .vue-liste.a-split .split-nav::after{display:none}
-  .split-titre{display:flex;flex-direction:column;gap:.9rem;pointer-events:none}
-  .split-titre-fente{position:relative;height:1em;font-size:clamp(2.8rem,4.2vw,5.6rem);clip-path:inset(0 -100vw 0 -2rem)}
-  .split-titre-piste{position:absolute;left:0;top:0;will-change:transform}
-  .split-titre-nom{display:block;height:1em;line-height:1em;font-family:var(--font-titre);font-weight:400;text-transform:uppercase;letter-spacing:.01em;color:var(--blanc);white-space:nowrap}
-  .split-titre-meta{display:flex;gap:1.2rem;margin:0;font-family:var(--font-mono);font-size:var(--fs-mono-sm);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75)}
-  .split-titre-annee{color:rgba(255,255,255,.5)}
-
-  /* petite liste */
-  .vue-liste.a-split .split-nav-track{gap:.15rem}
-  .vue-liste.a-split .split-nav-item{flex-direction:row;align-items:baseline;gap:0;padding:.18rem 0;opacity:1;transform:none}
-  .vue-liste.a-split .split-nav-ligne{display:flex;flex-direction:row-reverse;align-items:baseline;gap:1rem}
-  .vue-liste.a-split .split-nav-titre{font-family:var(--font-mono);font-size:var(--fs-mono-sm);letter-spacing:.06em;text-transform:uppercase;font-style:normal !important;color:rgba(255,255,255,.3);padding:0;transition:color .3s ease}
-  .vue-liste.a-split .split-nav-num{width:1.6rem;font-size:var(--fs-mono-xs);color:rgba(255,255,255,.3);transition:color .3s ease}
-  .vue-liste.a-split .split-nav-item.actif .split-nav-titre,.vue-liste.a-split .split-nav-item.actif .split-nav-num{color:var(--blanc)}
-  .vue-liste.a-split .split-nav-item:not(.actif):hover .split-nav-titre{color:rgba(255,255,255,.7)}
-  .vue-liste.a-split .split-nav-item:not(.actif):hover{opacity:1}
-  .vue-liste.a-split .split-nav-meta{display:none}
-
-  /* projets collés : petit écart régulier, plus de traits ni de légende sous les covers */
-  .vue-liste.a-split .projet-item{padding:clamp(5px,.45vw,8px) 0}
-  .vue-liste.a-split .projet-item::after,.vue-liste.a-split .projet-item:first-child::before{display:none}
-  .vue-liste.a-split .projet-lien{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0}
-  .vue-liste.a-split .projet-cover-lien{border-radius:clamp(.6rem,1vw,1.1rem)}
-  /* le projet à l'écran est net, les autres un peu en retrait */
-  .vue-liste.a-split .projet-item .projet-cover-lien{transition:width .8s cubic-bezier(0.4,0,0.2,1),margin-left .8s cubic-bezier(0.4,0,0.2,1),opacity .5s ease}
-  .vue-liste.a-split .projet-item.pas-actif .projet-cover-lien{opacity:.4}
-  .vue-liste.a-split .projet-item.pas-actif:hover .projet-cover-lien{opacity:.75}
+  .split-main .projet-item{padding:clamp(5px,.45vw,8px) 0}
+  .split-main .projet-item::after,.split-main .projet-item:first-child::before{display:none !important}
+  .split-main .projet-lien{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:0}
+  .split-main .projet-cover-lien{border-radius:clamp(.6rem,1vw,1.1rem)}
 }
-@media(prefers-reduced-motion:reduce){.split-titre-piste{transition:none !important}}
