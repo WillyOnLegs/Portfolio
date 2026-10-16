@@ -43,9 +43,14 @@ appliquerFiltres();fermerPopup();});}}
 /* Vue grille : motif « 1 + 2 » (une grande à gauche, deux à droite), comme la grille des pages projets.
    S'il reste 1 ou 2 projets à la fin, ils passent en duo côte à côte. Recalculé à chaque filtre. */
 (function(){const liste=document.getElementById('projets-liste');if(!liste)return;
-function majMosaique(){const vis=Array.from(liste.querySelectorAll('.projet-item')).filter(a=>a.style.display!=='none');const n=vis.length;const reste=n%3;
-let nbTrios=Math.floor(n/3);let duoDepuis=n;if(reste===2)duoDepuis=n-2;else if(reste===1&&nbTrios>0)duoDepuis=n-4;
-vis.forEach((a,i)=>{const duo=i>=duoDepuis||n===1;a.classList.toggle('pg-duo',duo);a.classList.toggle('pg-big',!duo&&i%3===0);});}
+function majMosaique(){const vis=Array.from(liste.querySelectorAll('.projet-item')).filter(a=>a.style.display!=='none');
+/* ordre : duo, 1+2 (grande à gauche), duo, 1+2 (grande à droite), puis on recommence */
+const motif=[['duo',2],['trio',3,'g'],['duo',2],['trio',3,'d']];let i=0,m=0;
+vis.forEach(a=>a.classList.remove('pg-duo','pg-big','pg-big-r'));
+while(i<vis.length){const[type,nb,cote]=motif[m%4];const reste=vis.length-i;
+if(type==='trio'&&reste>=3){vis[i].classList.add('pg-big');if(cote==='d')vis[i].classList.add('pg-big-r');i+=3;}
+else{const k=Math.min(2,reste);for(let j=0;j<k;j++)vis[i+j].classList.add('pg-duo');i+=k;}
+m++;}}
 let t=null;const plan=()=>{if(t)return;t=requestAnimationFrame(()=>{t=null;majMosaique();});};
 new MutationObserver(plan).observe(liste,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
 majMosaique();})();
