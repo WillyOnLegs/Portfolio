@@ -39,22 +39,30 @@
 }
 
 /* ==============================================================
-   Vue liste (ordinateur) : projets plus serrés ; la liste des
-   projets à gauche se déroule pour garder le projet à l'écran
-   en face de sa cover, avec son type et son année en dessous.
+   Vue liste (ordinateur) : projets serrés. À gauche, en haut un
+   grand titre qui roule avec le scroll (type et année dessous),
+   et en dessous la petite liste de tous les projets.
    ============================================================== */
 @media(min-width:901px){
-  /* fondu en haut et en bas de la liste qui défile */
-  .vue-liste.a-split .split-nav::before,.vue-liste.a-split .split-nav::after{content:'';display:block;position:absolute;left:-4rem;right:0;height:22%;pointer-events:none;z-index:1}
-  .vue-liste.a-split .split-nav::before{top:0;background:linear-gradient(to top,transparent,#0a0a0a)}
-  .vue-liste.a-split .split-nav::after{bottom:0;background:linear-gradient(to bottom,transparent,#0a0a0a)}
-  .vue-liste.a-split .split-nav-track{transition:transform .75s cubic-bezier(.16,1,.3,1);will-change:transform}
-  .vue-liste.a-split .split-nav-item{flex-direction:column;align-items:flex-start;gap:0}
-  .split-nav-ligne{display:flex;align-items:baseline;gap:.2em}
-  .split-nav-meta{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .55s cubic-bezier(.16,1,.3,1),opacity .35s ease}
-  .split-nav-meta>span{overflow:hidden;font-family:var(--font-mono);font-size:var(--fs-mono-sm);letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.7);white-space:nowrap}
-  .split-nav-item.actif .split-nav-meta{grid-template-rows:1fr;opacity:1;transition-delay:.1s}
-  .split-nav-item.actif .split-nav-meta>span{padding-top:.5rem}
+  .vue-liste.a-split .split-nav{justify-content:center;gap:clamp(2rem,5vh,3.5rem)}
+  .vue-liste.a-split .split-nav::after{display:none}
+  .split-titre{display:flex;flex-direction:column;gap:.9rem;pointer-events:none}
+  .split-titre-fente{position:relative;height:1em;font-size:clamp(2.8rem,4.2vw,5.6rem);clip-path:inset(0 -100vw 0 -2rem)}
+  .split-titre-piste{position:absolute;left:0;top:0;will-change:transform}
+  .split-titre-nom{display:block;height:1em;line-height:1em;font-family:var(--font-titre);font-weight:400;text-transform:uppercase;letter-spacing:.01em;color:var(--blanc);white-space:nowrap}
+  .split-titre-meta{display:flex;gap:1.2rem;margin:0;font-family:var(--font-mono);font-size:var(--fs-mono-sm);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+  .split-titre-annee{color:rgba(255,255,255,.5)}
+
+  /* petite liste */
+  .vue-liste.a-split .split-nav-track{gap:.15rem}
+  .vue-liste.a-split .split-nav-item{flex-direction:row;align-items:baseline;gap:0;padding:.18rem 0;opacity:1;transform:none}
+  .vue-liste.a-split .split-nav-ligne{display:flex;flex-direction:row-reverse;align-items:baseline;gap:1rem}
+  .vue-liste.a-split .split-nav-titre{font-family:var(--font-mono);font-size:var(--fs-mono-sm);letter-spacing:.06em;text-transform:uppercase;font-style:normal !important;color:rgba(255,255,255,.3);padding:0;transition:color .3s ease}
+  .vue-liste.a-split .split-nav-num{width:1.6rem;font-size:var(--fs-mono-xs);color:rgba(255,255,255,.3);transition:color .3s ease}
+  .vue-liste.a-split .split-nav-item.actif .split-nav-titre,.vue-liste.a-split .split-nav-item.actif .split-nav-num{color:var(--blanc)}
+  .vue-liste.a-split .split-nav-item:not(.actif):hover .split-nav-titre{color:rgba(255,255,255,.7)}
+  .vue-liste.a-split .split-nav-item:not(.actif):hover{opacity:1}
+  .vue-liste.a-split .split-nav-meta{display:none}
 
   /* projets collés : petit écart régulier, plus de traits ni de légende sous les covers */
   .vue-liste.a-split .projet-item{padding:clamp(5px,.45vw,8px) 0}
@@ -66,4 +74,4 @@
   .vue-liste.a-split .projet-item.pas-actif .projet-cover-lien{opacity:.4}
   .vue-liste.a-split .projet-item.pas-actif:hover .projet-cover-lien{opacity:.75}
 }
-@media(prefers-reduced-motion:reduce){.split-nav-track,.split-nav-meta{transition:none !important}}
+@media(prefers-reduced-motion:reduce){.split-titre-piste{transition:none !important}}
