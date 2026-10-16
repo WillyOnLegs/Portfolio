@@ -253,7 +253,7 @@
   var aMesurer = true;
   function remonterContact() {
     if (!ctWrap || !aMesurer) return;
-    if (!MQ_DESKTOP.matches) { ctWrap.style.marginTop = ''; aMesurer = false; return; }
+    if (!MQ_DESKTOP.matches) { ctWrap.style.marginTop = ''; ctWrap.style.background = ''; aMesurer = false; return; }
     var split = document.querySelector('.selected-split');
     var panneau = document.querySelector('.selected-panel');
     var medias = document.querySelectorAll('.selected-main .selected-media');
@@ -266,7 +266,14 @@
     var hautP = parseFloat(cs.paddingTop) || 0, basP = parseFloat(cs.paddingBottom) || 0;
     var basMedia = hautP + (H - hautP - basP) / 2 + hm / 2;
     var vide = Math.max(0, H - basMedia - basP);
-    ctWrap.style.marginTop = (-vide).toFixed(0) + 'px';
+    // la carte « Let's work together » arrive juste sous la dernière vidéo, sans la chevaucher :
+    // le haut du contact est transparent sur cette hauteur (on voit le noir du Selected work derrière)
+    var Wc = ctStage.clientWidth || window.innerWidth;
+    var mC = parseFloat(getComputedStyle(ctInner).paddingRight) || 24;
+    var h0C = Math.min(Wc * 0.34, 500) * 0.62;
+    var avance = Math.max(0, H - h0C - mC - H * 0.06);
+    ctWrap.style.marginTop = (-(vide + avance)).toFixed(0) + 'px';
+    ctWrap.style.background = 'linear-gradient(transparent ' + avance.toFixed(0) + 'px, var(--noir) ' + avance.toFixed(0) + 'px)';
     aMesurer = false;
   }
 
