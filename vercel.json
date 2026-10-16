@@ -28,59 +28,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/work",
-      "destination": "/pages/projets.html"
-    },
-    {
-      "source": "/work/:slug",
-      "destination": "/pages/projets/:slug.html"
-    },
-    {
-      "source": "/about",
-      "destination": "/pages/apropos.html"
-    },
-    {
-      "source": "/contact",
-      "destination": "/pages/contact.html"
-    },
-    {
-      "source": "/mentions-legales",
-      "destination": "/pages/mentions-legales.html"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/index.html",
-      "destination": "/",
-      "permanent": true
-    },
-    {
-      "source": "/pages/projets.html",
-      "destination": "/work",
-      "permanent": true
-    },
-    {
-      "source": "/pages/projets/:slug([^/.]+)\\.html",
-      "destination": "/work/:slug",
-      "permanent": true
-    },
-    {
-      "source": "/pages/apropos.html",
-      "destination": "/about",
-      "permanent": true
-    },
-    {
-      "source": "/pages/contact.html",
-      "destination": "/contact",
-      "permanent": true
-    },
-    {
-      "source": "/pages/mentions-legales.html",
-      "destination": "/mentions-legales",
-      "permanent": true
-    }
   ]
 }

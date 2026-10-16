@@ -305,11 +305,11 @@
       nxName.textContent = next.nom;
       nxName.style.setProperty('--len', Math.max(4, next.nom.length));
       var nxLinks = el('div', 'pp-next-liens');
-      var all = el('a', 'pp-next-lien', { href: '/work', 'data-curseur': true, tabindex: '-1' });
+      var all = el('a', 'pp-next-lien', { href: '/pages/projets.html'/* CLEAN-URL: '/work' */, 'data-curseur': true, tabindex: '-1' });
       var allTxt = el('span', null, { 'data-i18n': 'home.viewall' });
       allTxt.textContent = t('home.viewall', 'View all work');
       all.appendChild(allTxt);
-      var contact = el('a', 'pp-next-lien', { href: '/contact', 'data-curseur': true, tabindex: '-1' });
+      var contact = el('a', 'pp-next-lien', { href: '/pages/contact.html'/* CLEAN-URL: '/contact' */, 'data-curseur': true, tabindex: '-1' });
       var ctTxt = el('span', null, { 'data-i18n': 'nav.contact' });
       ctTxt.textContent = t('nav.contact', 'Contact');
       contact.appendChild(ctTxt);
